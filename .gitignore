@@ -1,0 +1,8 @@
+*.pdb
+/LARCmaCS/*.user
+/LARCmaCS/Makefile*
+/bind/*
+/bin/*.exe
+/build/*
+/build*
+/macsCommon/proto/cpp/*.pb*
