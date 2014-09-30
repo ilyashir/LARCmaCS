@@ -38,6 +38,7 @@ win32 {
 }
 
 QT       += core gui
+QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -62,7 +63,8 @@ SOURCES += main.cpp\
     sceneView.cpp \
     receiver.cpp \
     mainAlg.cpp \
-    mlData.cpp
+    mlData.cpp \
+    connector.cpp
 
 HEADERS  += \
   $${SHARED_DIR}/net/netraw.h \
@@ -78,6 +80,7 @@ HEADERS  += \
     packetSSL.h \
     receiver.h \
     mainAlg.h \
-    mlData.h
+    mlData.h \
+    connector.h
 
 FORMS    += larcmacs.ui

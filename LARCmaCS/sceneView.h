@@ -12,32 +12,28 @@ struct sceneViewWorker: public QObject
     Q_OBJECT
 
 public:
-
-    sceneViewWorker(){}
+    explicit sceneViewWorker(){}
 
 public slots:
-    void start(){
+    void start()
+    {
         shutdownview = false;
-        cout << "sceneVie worker start" << endl;
+        cout << "sceneView worker started" << endl;
         run();
     }
 
-    void stop(){
-        shutdownview = true;
-    }
-
+    void stop() { shutdownview = true; }
     void repaintScene();
+
 signals:
     void updateView();
 
 private:
-
     void run();
     bool shutdownview;
 };
 
-
-struct sceneView: public QObject
+struct sceneView: QObject
 {
     Q_OBJECT
 
@@ -45,10 +41,11 @@ public:
     sceneViewWorker worker;
     QThread thread;
 
-    sceneView(){}
+    explicit sceneView(){}
     ~sceneView() { stop(); thread.terminate(); thread.wait(100); }
 
-    void init(){
+    void init()
+    {
         worker.moveToThread(&thread);
         cout << "sceneView init ok" << endl;
         connect(this, SIGNAL(wstart()), &worker, SLOT(start()));
@@ -56,13 +53,14 @@ public:
         connect(&thread, SIGNAL(finished()), &worker, SLOT(deleteLater()));
     }
 
-    void start() {
+    void start()
+    {
         thread.start();
-//        cout << "thread start" << endl;
+        cout << "Scene view thread started" << endl;
         emit wstart();
     }
 
-    void stop() { emit wstop();}
+    void stop() { emit wstop(); }
 
 signals:
     void wstart();

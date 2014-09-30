@@ -16,19 +16,20 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     ui->fieldView->setScene(fieldscene);
 
     receiver.init();
-    sceneview.init();
     mainalg.init();
-//    connect(&receiver.worker, SIGNAL(activate()), &sceneview.worker, SLOT(repaintScene()));
-    connect(&receiver.worker, SIGNAL(activate()), &mainalg.worker, SLOT(run()));
+    sceneview.init();
+    connector.init();
+
+    connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
+//    connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
+    connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
     connect(&sceneview.worker, SIGNAL(updateView()), this, SLOT(updateView()));
-//    connect(&recievedn, SIGNAL(activate()),&sceneview,SLOT(repainScene()));
-//    connect(&recievedn, SIGNAL(finished()), &recievedn, SLOT(deleteLater()));
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
-//    sceneview.start();
-    //recievedn.startread();
+
     sceneview.start();
     receiver.start();
     mainalg.start();
+    connector.start();
 }
 
 LARCmaCS::~LARCmaCS()
@@ -36,7 +37,7 @@ LARCmaCS::~LARCmaCS()
     delete ui;
 }
 
-void LARCmaCS::scaleView ( int _sizescene )
+void LARCmaCS::scaleView(int _sizescene)
 {
 //    cout << _sizescene << "  " << sizescene;
 //    qreal scaleFactor = (drawScale-1) - (qreal)_scaleFactor/100;
@@ -44,7 +45,7 @@ void LARCmaCS::scaleView ( int _sizescene )
 //    qreal factor = ui->view->matrix().scale ( scaleFactor, scaleFactor ).mapRect ( QRectF ( 0, 0, 1, 1 ) ).width();
 //    cout << factor << "  ";
 //    if ( factor > 0.07 && factor < 100.0 )
-    //drawscale = 1 - (float)(sizescene-_sizescene)/10;
+//    drawscale = 1 - (float)(sizescene-_sizescene)/10;
     drawscale = pow(0.9, _sizescene-sizescene);
     sizescene = _sizescene;
 //    ui->view->wheelEvent();

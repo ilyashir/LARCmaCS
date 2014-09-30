@@ -14,23 +14,22 @@ struct ReceiverWorker : public QObject
 {
     Q_OBJECT
 public:
-    ReceiverWorker(){}
+    explicit ReceiverWorker() {}
 
 public slots:
-    void start(){
+    void start()
+    {
         shutdownread = false;
         cout << "Receiver worker start" << endl;
         run();
     }
 
-    void stop(){
-        shutdownread = true;
-    }
+    void stop() { shutdownread = true; }
+
 signals:
-    void activate();
+    void activate(PacketSSL packetssl);
 
 private:
-
     void run();
 
     RoboCupSSLClient client;
@@ -45,24 +44,32 @@ public:
     ReceiverWorker worker;
     QThread thread;
 
-    Receiver(){}
-    ~Receiver() { stop(); thread.terminate(); thread.wait(100); }
+    Receiver() {}
+    ~Receiver()
+    {
+        stop();
+        thread.terminate();
+        thread.wait(100);
+    }
 
-    void init(){
+    void init()
+    {
+
         worker.moveToThread(&thread);
-        cout << "init ok" << endl;
+        cout << "Init ok" << endl;
         connect(this, SIGNAL(wstart()), &worker, SLOT(start()));
         connect(this, SIGNAL(wstop()), &worker, SLOT(stop()));
         connect(&thread, SIGNAL(finished()), &worker, SLOT(deleteLater()));
     }
 
-    void start() {
+    void start()
+    {
         thread.start();
 //        cout << "thread start" << endl;
         emit wstart();
     }
 
-    void stop() { emit wstop();}
+    void stop() { emit wstop(); }
 
 signals:
     void wstart();

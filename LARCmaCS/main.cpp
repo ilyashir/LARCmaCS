@@ -1,5 +1,7 @@
 #include "larcmacs.h"
 #include <QApplication>
+#include <QTcpServer>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {

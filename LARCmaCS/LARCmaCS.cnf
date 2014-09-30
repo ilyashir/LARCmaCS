@@ -1,0 +1,7 @@
+rfclient.name=RoboFootball
+rfclient.file_of_matlab=main
+rfclient.RULE_AMOUNT=5
+rfclient.RULE_LENGTH=5
+rfclient.BACK_AMOUNT=10
+rfclient.BACK_LENGTH=8
+

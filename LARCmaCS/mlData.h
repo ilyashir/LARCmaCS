@@ -5,13 +5,14 @@
 #include "engine.h"
 #include "matrix.h"
 
-typedef struct {
+typedef struct
+{
     std::string	name;
-    const char* file_of_matlab;
-    int         RULE_AMOUNT;
-    int     	RULE_LENGTH;
-    int 		BACK_AMOUNT;
-    int         BACK_LENGTH;
+    const char *file_of_matlab;
+    int RULE_AMOUNT;
+    int RULE_LENGTH;
+    int BACK_AMOUNT;
+    int BACK_LENGTH;
 } RCConfig;
 
 class MlData
@@ -20,7 +21,9 @@ public:
     MlData(){}
     MlData(RCConfig conf);
     MlData(const MlData &data);
-//    virtual ~MlData(){
+
+    // Вроде MATLAB, а потому и вся прога крашится при mxDestroyArray, пока без деструктора
+//    virtual ~MlData() {
 //        mxDestroyArray(Ball);
 //        mxDestroyArray(Blue);
 //        mxDestroyArray(Yellow);
@@ -35,15 +38,13 @@ public:
     RCConfig config;
 
     Engine  *ep;
-//    mxArray *Rules_length;
-//    mxArray *Rules_count;
-//    mxArray *Ball;
-//    mxArray *Blue;
-//    mxArray *Yellow;
-//    mxArray *Rule;
-//    mxArray *Back_Params;
-//    mxArray *Back_Amount;
-//    mxArray *Back_Length;
+    mxArray *Rule;
+    mxArray *Ball;
+    mxArray *Blue;
+    mxArray *Yellow;
+    mxArray *Back_Params;
+    mxArray *Back_Amount;
+    mxArray *Back_Length;
 };
 
 #endif // MLDATA_H

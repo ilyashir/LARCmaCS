@@ -5,77 +5,78 @@
 #include <QThread>
 #include <QSharedPointer>
 #include "packetSSL.h"
-//#include "robocup_ssl_client.h"
 #include <iostream>
 #include "mlData.h"
 
 using namespace std;
 
-//main algorithm worker
 struct MainAlgWorker : public QObject
 {
     Q_OBJECT
+
 public:
-    MainAlgWorker(){}
+    explicit MainAlgWorker(){}
+
+signals:
+    void sendToConnector(double *ruleArray);
 
 public slots:
-    void start(){
+    void start()
+    {
         shutdowncomp = false;
         cout << "MainAlg worker start" << endl;
         init();
     }
 
-    void stop(){
-        shutdowncomp = true;
-    }
+    void stop() { shutdowncomp = true; }
 
-    void run();
+    void run(PacketSSL packetssl);
 
     void run_matlab();
     void stop_matlab();
-signals:
-
 
 private:
-
     void init();
 
-//    RoboCupSSLClient client;
-//    SSL_WrapperPacket packet;
-    char m_buffer[256];
-
+    char m_buffer[256]; // matlab buffer
     MlData fmldata;
     bool fmtlab;
     bool shutdowncomp;
 };
 
-
-//class main algorithm
-class MainAlg : public QObject
+struct MainAlg : public QObject
 {
     Q_OBJECT
+
 public:
     MainAlgWorker worker;
     QThread thread;
 
     explicit MainAlg(){}
-    ~MainAlg() { stop(); thread.terminate(); thread.wait(100); }
+    ~MainAlg()
+    {
+        stop();
+        thread.terminate();
+        thread.wait(100);
+    }
 
-    void init(){
+    void init()
+    {
         worker.moveToThread(&thread);
-        cout << "init mainAlg ok" << endl;
+        cout << "Init mainAlg ok" << endl;
         connect(this, SIGNAL(wstart()), &worker, SLOT(start()));
         connect(this, SIGNAL(wstop()), &worker, SLOT(stop()));
         connect(&thread, SIGNAL(finished()), &worker, SLOT(deleteLater()));
     }
 
-    void start() {
+    void start()
+    {
         thread.start();
-//        cout << "thread start" << endl;
+        cout << "Thread start" << endl;
         emit wstart();
     }
 
-    void stop() { emit wstop();}
+    void stop() { emit wstop(); }
 
 signals:
     void wstart();

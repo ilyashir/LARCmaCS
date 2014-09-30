@@ -2,14 +2,16 @@
 #define LARCMACS_H
 
 #include <QWidget>
+
 #include "fieldScene.h"
-#include "sceneView.h"
-//#include "recievedn.h"
 #include "receiver.h"
 #include "mainAlg.h"
+#include "sceneView.h"
+#include "connector.h"
 
-namespace Ui {
-class LARCmaCS;
+namespace Ui
+{
+    class LARCmaCS;
 }
 
 class LARCmaCS : public QWidget
@@ -20,15 +22,14 @@ public:
     explicit LARCmaCS(QWidget *parent = 0);
     ~LARCmaCS();
 
-    FieldScene* fieldscene;
+    FieldScene *fieldscene;
 
 protected:
     bool scalingRequested;
     sceneView sceneview;
     Receiver receiver;
     MainAlg mainalg;
-//    RecievedN recievedn;
-
+    Connector connector;
 
 private:
     Ui::LARCmaCS *ui;

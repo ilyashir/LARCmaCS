@@ -13,40 +13,40 @@ int initConfig(RCConfig *config){
 
     configFile.open("LARCmaCS.cnf", ios::in);
 
-    if(!configFile.is_open()){
+    if(!configFile.is_open()) {
         cerr << "Can't open configuration file" << endl;
         return -1;
     }
 
-    if(!config){
-            cerr << "Can't parse configuration file" << endl;
-            return -2;
-        }
+    if(!config) {
+        cerr << "Can't parse configuration file" << endl;
+        return -2;
+    }
 
     while(!configFile.eof()){
         getline(configFile, line);
 
-        if(line.empty()){
+        if(line.empty())
             continue;
-        }
-        if(line.find("rfclient.name") != string::npos){
+
+        if(line.find("rfclient.name") != string::npos) {
             config->name = line.substr(line.find('=') + 1);
 
-            if(config->name.size() > 16){
+            if(config->name.size() > 16) {
                 cerr << "[WARNING] rfclient.name value is too long." << endl << "It will be truncated up to 16 characters." << endl;
                 config->name.resize(16);
             }
         }
 
-        if(line.find("rfclient.file_of_matlab") != string::npos){
+        if(line.find("rfclient.file_of_matlab") != string::npos) {
             string fom = line.substr(line.find('=') + 1);
 
-            if(fom.size() > 16){
+            if(fom.size() > 16) {
                 cerr << "[WARNING] rfclient.file_of_matlab value is too long." << endl << "It will be truncated up to 16 characters." << endl;
                 fom.resize(16);
             }
-            char *str = new char[ fom.length() + 1 ];
-            strcpy(str,  fom.c_str());
+            char *str = new char[fom.length() + 1];
+            strcpy(str, fom.c_str());
             config->file_of_matlab = str;
         }
 
@@ -77,8 +77,7 @@ void MainAlgWorker::init(){
 
     cout << "Initialization config file..." << endl;
 
-    if(!initConfig(&rcconfig)){
-
+    if(!initConfig(&rcconfig)) {
         cout << rcconfig.file_of_matlab << endl;
         cout << rcconfig.name << endl;
         cout << rcconfig.BACK_AMOUNT << endl;
@@ -88,8 +87,7 @@ void MainAlgWorker::init(){
 
         cout << "...successful" << endl;
     }
-    else
-    {
+    else {
         cerr << "...bad" << endl;
         char *str = new char[16];
         str = "Robofootball";
@@ -107,34 +105,31 @@ void MainAlgWorker::init(){
     fmldata = mtl;
 
     run_matlab();
-
-
 }
 
 void MainAlgWorker::run_matlab()
 {
     cout << "Work is started..." << endl;
-//    mutex.lock();
-    if (!(fmldata.ep = engOpen(NULL))) {
-            cerr << "Can't open Matlab Engine" << endl;
-            fmtlab = false;
-            return;
-        }
 
-    // matlab buffer
-    m_buffer[255]='\0';
+    if (!(fmldata.ep = engOpen(NULL))) {
+        cerr << "Can't open Matlab Engine" << endl;
+        fmtlab = false;
+        return;
+    }
+
+    m_buffer[255] = '\0';
     engOutputBuffer(fmldata.ep, m_buffer, 255);
 
-    //-------Path_Of_Files-------
+    // Path_Of_Files
     TCHAR CurrentPath[MAX_PATH];
     char StringWithPath[MAX_PATH],StringPath[MAX_PATH];
 
-    //-----Detect Directory-------
+    // Detecting Directory
     printf("Matlab Engine is opened\nStart to detect directory\n");
-    GetCurrentDirectory(sizeof(CurrentPath),CurrentPath);
+    GetCurrentDirectory(sizeof(CurrentPath), CurrentPath);
 
 #ifdef UNICODE
-    wcstombs(StringPath, CurrentPath, MAX_PATH-1);
+    wcstombs(StringPath, CurrentPath, MAX_PATH - 1);
 #else
     CharToOem(StringPath, CurrentPath);
 #endif
@@ -145,30 +140,77 @@ void MainAlgWorker::run_matlab()
 
     //-----create Rules-----
     char sendString[256];
-    sprintf (sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_LENGTH, fmldata.config.RULE_AMOUNT);
+    sprintf (sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
     engEvalString(fmldata.ep, sendString);
     engEvalString(fmldata.ep, "disp(1)");
 
-//    mutex.unlock();
-
     fmtlab = true;
-
-
 }
 
 void MainAlgWorker::stop_matlab()
 {
-//    mutex.lock();
-//    engEvalString(currentRfData.seng.ep, "exit");
     fmtlab = false;
-//    mutex.unlock();
 }
 
-void MainAlgWorker::run(){
-
-    if((!shutdowncomp) && (fmtlab))
-    {
+void MainAlgWorker::run(PacketSSL packetssl)
+{
+    if(!shutdowncomp && fmtlab)
         cout << "Packet is received!" << endl;
+
+    // [Start] Debug printing arrays from pocketssl
+//    cout << "Balls array is: ";
+//    for (int i = 0; i < sizeof(packetssl.balls) / sizeof(packetssl.balls[0]); i++)
+//        cout << packetssl.balls[i] << " # ";
+//    cout << endl;
+
+//    cout << "Blues array is: ";
+//    for (int i = 0; i < sizeof(packetssl.robots_blue) / sizeof(packetssl.robots_blue[0]); i++)
+//        cout << packetssl.robots_blue[i] << " | ";
+//    cout << endl;
+
+//    cout << "Yellows array is: ";
+//    for (int i = 0; i < sizeof(packetssl.robots_yellow) / sizeof(packetssl.robots_yellow[0]); i++)
+//        cout << packetssl.robots_yellow[i] << " # ";
+//    cout << endl;
+    // [End] Debug printing arrays from pocketssl
+
+    memcpy(mxGetPr(fmldata.Ball), packetssl.balls, BALL_COUNT_d);
+    memcpy(mxGetPr(fmldata.Blue), packetssl.robots_blue, TEAM_COUNT_d);
+    memcpy(mxGetPr(fmldata.Yellow), packetssl.robots_yellow, TEAM_COUNT_d);
+
+    engPutVariable(fmldata.ep, "Balls", fmldata.Ball);
+    engPutVariable(fmldata.ep, "Blues", fmldata.Blue);
+    engPutVariable(fmldata.ep, "Yellows", fmldata.Yellow);
+
+    engEvalString(fmldata.ep, fmldata.config.file_of_matlab);
+
+    fmldata.Rule = engGetVariable(fmldata.ep, "Rules");
+
+    char sendString[256];
+    sprintf(sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
+    engEvalString(fmldata.ep, sendString);
+
+    double *ruleArray = (double *)malloc(fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
+
+    memcpy(ruleArray, mxGetPr(fmldata.Rule), fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
+
+    // [Start] Debug printing got ruleArray matrix
+
+    cout << "Rules in array form is:" << endl;
+//    for (int i = 0; i <fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH; i++) {
+//        cout << ruleArray[i] << " ";
+//    }
+//    cout << endl;
+
+    cout << "Rules in matrix form is:" << endl;
+    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
+        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
+            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
+        }
+        cout << endl;
     }
 
+    // [End] Debug printing got ruleArray matrix
+
+    emit sendToConnector(ruleArray);
 }
