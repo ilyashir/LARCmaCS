@@ -1,0 +1,82 @@
+%%  TrackAvoidance (Нападающий)
+B=Balls(2:3);       %цель
+X=Yellows(4,2:4);   %Входящий робот (4ый среди жёлтых)
+G=[0,0];            %Ворота
+ST=[-1500,1200];    %Точка ожидания
+Opponent=Blues(Blues(:,1)>0,2:3);                 %Соперники (все синии)
+Opponent2=[Yellows(Yellows(:,1)>0,2:3);Opponent]; %Препятствия (все роботы)
+if  ((Balls(1)==0)||(abs(B(1))>PAR.MAP_X/2-300)||(abs(B(2))>PAR.MAP_Y/2-300)) %Если мячь не в играбетельной зоне
+    if (norm(ST-X(1:2))>300) %Если расстояния до точки ожидания больше 300
+        [Left,Right]=TrackAvoidance(X(1:2),X(3),ST,angV(B-ST),12,Opponent,0,0); %Обходим препятствия и едем к ST
+    else
+        %Остановились.
+        Left=0;
+        Right=0;
+    end
+    Kick=0;
+else
+    if (norm(B-X(1:2))<700 && isSectorClear(X(1:2),B,angV(G-B),Opponent,100)) %Если мы близки к мячу и сектор для захода свободен
+        [Left,Right,Kick]=GOSlide(X(1:2),X(3),B,angV(G-B));       %Заход на мячь
+    else
+        Kick=0;
+        [Left,Right]=TrackAvoidance(X(1:2),X(3),B,angV(G-B),2,Opponent);  %Обходим препятствия и едем к B
+    end
+end
+[Left,Right]=ReactAvoidance(Left,Right,X(1:2),X(3),Opponent2); %Реактивные обход препятствий (не врезаться в своих).
+Rule(4,Left,Right,-Kick,0,0); %Отправляем на 4ого робота.
+
+
+
+%% TrackAvoidance (Нападающий) упращённый вариант
+% B=[Balls(1,2),Balls(1,3)]; 
+% X=Blues(3,2:4);
+% Opponent=Yellows(Yellows(:,1)>0,2:3);
+% Opponent2=[Blues(Blues(:,1)>0,2:3);Opponent];
+% G=[-3500,0];%[-PAR.MAP_X/2,0000]; %Ворота
+% if (norm(B-X(1:2))<700 && isSectorClear(X(1:2),B,angV(G-B),Opponent,100))
+%     [Left,Right,Kick]=GOSlide(X(1:2),X(3),B,angV(G-B));       
+% else
+%     Kick=0;
+%     [Left,Right]=TrackAvoidance(X(1:2),X(3),B,angV(G-B),2,Opponent);
+% end
+% if ~isSectorClear(X(1:2),X(1:2)+300*[cos(X(3)),sin(X(3))],Opponent2);
+%     V=(Left+Right)/2;
+%     Left=Left-V;
+%     Right=Right-V;
+% end
+% Rule(6,Left,Right,Kick,0,0);
+% end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Очень простой нападающий. 
+% B=[Balls(1,2),Balls(1,3)]; 
+% X=Yellows(11,2:4);
+% [Left,Right,Kick]=GoSlide(X(1:2),X(3),B,pi/6);
+% Rule(5,Left,Right,Kick,0,0);
+
+%% Простой нападающий
+% B=Balls(2:3);
+% X=Yellows(10,2:4); %Входящий робот
+% G=[-2000,2000]; %Ворота
+% ST=[-1500,-1500]; %Точка ожидания
+% if  ((Balls(1)==0)||(abs(B(1))>2800)||(abs(B(2))>2700)||((B(2))>000))
+%     [Left,Right]=GoToPoint(X(1:2),X(3),ST,pi/2-pi/2*sign(B(1)));
+%    Kick=0;
+% else 
+%     %[Left,Right,Kick]=GOcircle6(X(1:2),X(3),B,angV(G-B));
+%     [Left,Right,Kick]=GOSlide(X(1:2),X(3),B,angV(G-B));
+%     %[Left,Right,Kick]=GOeiler(X(1:2),X(3),B,angV(G-B));%angV(G-B));
+% end
+% Rule(2,Left,Right,-Kick,0,0);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Голкипер.
+if (Balls(1)==0)
+    Left=0;Right=0;Kick=0;
+else
+    B=[Balls(1,2),Balls(1,3)]; 
+    X=Yellows(10,2:4);
+    G=[-2800,0]; %Уровень ворот
+    [Left,Right,Kick]=GoalKeeper(X(1:2),X(3),B,G);
+end
+Rule(1,Left,Right,-Kick,0,0);
