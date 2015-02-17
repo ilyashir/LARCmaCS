@@ -19,6 +19,7 @@ public:
 
 signals:
     void sendToConnector(double *ruleArray);
+    void sendToBTtransmitter(char * message);
 
 public slots:
     void start()

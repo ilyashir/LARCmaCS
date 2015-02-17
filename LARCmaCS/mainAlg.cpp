@@ -201,7 +201,7 @@ void MainAlgWorker::run(PacketSSL packetssl)
 //        cout << ruleArray[i] << " ";
 //    }
 //    cout << endl;
-
+/*
     cout << "Rules in matrix form is:" << endl;
     for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
         for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
@@ -209,7 +209,18 @@ void MainAlgWorker::run(PacketSSL packetssl)
         }
         cout << endl;
     }
-
+*/
+    cout << "Rules in matrix form is:" << endl;
+    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
+        char newmess[10];
+        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
+            newmess[j]=ruleArray[j * fmldata.config.RULE_AMOUNT + i];
+            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
+        }
+        if (newmess[0]==1)
+            sendToBTtransmitter(newmess);
+        cout << endl;
+    }
     // [End] Debug printing got ruleArray matrix
 
     emit sendToConnector(ruleArray);

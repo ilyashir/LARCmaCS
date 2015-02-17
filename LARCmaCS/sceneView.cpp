@@ -11,6 +11,7 @@ void sceneViewWorker::run(){
 //        cout << "signal updateView" << endl;
         emit updateView();
         QApplication::processEvents();
+        Sleep(1);
     }
 
 }

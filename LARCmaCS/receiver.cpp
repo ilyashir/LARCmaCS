@@ -80,6 +80,10 @@ void ReceiverWorker::run()
 
             emit activate(packetssl);
         }
+        else
+        {
+            Sleep(1);
+        }
     }
 
     client.close();

@@ -19,6 +19,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     mainalg.init();
     sceneview.init();
     connector.init();
+    bttransmitter.init();
 
     connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
 //    connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
@@ -26,10 +27,12 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(&sceneview.worker, SIGNAL(updateView()), this, SLOT(updateView()));
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
 
+    connect(&mainalg.worker,SIGNAL(sendToBTtransmitter(char *)),&bttransmitter.worker,SLOT(addmessage(char *)));
     sceneview.start();
     receiver.start();
     mainalg.start();
     connector.start();
+    bttransmitter.start();
 }
 
 LARCmaCS::~LARCmaCS()

@@ -8,6 +8,7 @@
 #include "mainAlg.h"
 #include "sceneView.h"
 #include "connector.h"
+#include "BTtransmitter.h"
 
 namespace Ui
 {
@@ -24,7 +25,8 @@ public:
 
     FieldScene *fieldscene;
 
-protected:
+protected:    
+    BTtransmitter bttransmitter;
     bool scalingRequested;
     sceneView sceneview;
     Receiver receiver;
