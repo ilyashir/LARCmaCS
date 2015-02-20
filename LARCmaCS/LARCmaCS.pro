@@ -70,7 +70,8 @@ SOURCES += main.cpp\
     mainAlg.cpp \
     mlData.cpp \
     connector.cpp \
-    BTtransmitter.cpp
+    BTtransmitter.cpp \
+    btform.cpp
 
 HEADERS  += \
   $${SHARED_DIR}/net/netraw.h \
@@ -88,6 +89,8 @@ HEADERS  += \
     mainAlg.h \
     mlData.h \
     connector.h \
-    BTtransmitter.h
+    BTtransmitter.h \
+    btform.h
 
-FORMS    += larcmacs.ui
+FORMS    += larcmacs.ui \
+    btform.ui

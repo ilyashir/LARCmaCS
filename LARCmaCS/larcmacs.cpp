@@ -74,3 +74,8 @@ void LARCmaCS::updateView()
   }
 
 }
+
+void LARCmaCS::on_pushButton_clicked()
+{
+    btform.show();
+}

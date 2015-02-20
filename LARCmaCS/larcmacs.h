@@ -9,6 +9,7 @@
 #include "sceneView.h"
 #include "connector.h"
 #include "BTtransmitter.h"
+#include "BTform.h"
 
 namespace Ui
 {
@@ -20,6 +21,7 @@ class LARCmaCS : public QWidget
     Q_OBJECT
 
 public:
+    BTform btform;
     explicit LARCmaCS(QWidget *parent = 0);
     ~LARCmaCS();
 
@@ -41,6 +43,7 @@ private:
 private slots:
     void updateView();
     void scaleView(int);
+    void on_pushButton_clicked();
 };
 
 #endif // LARCMACS_H
