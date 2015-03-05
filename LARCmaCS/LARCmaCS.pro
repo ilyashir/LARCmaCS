@@ -32,9 +32,12 @@ win32 {
   LIBS += -L$$PWD/../lib/ -llibprotobuf$${SUFFIX_STR} \
           -lws2_32
 
-  LIBS += -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibeng \
-          -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibmat \
-          -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibmx
+  LIBS += -L$${MATLAB_DIR}/lib/win64/microsoft/ -llibeng \
+          -L$${MATLAB_DIR}/lib/win64/microsoft/ -llibmat \
+          -L$${MATLAB_DIR}/lib/win64/microsoft/ -llibmx
+  #LIBS += -L$${MATLAB_DIR}/lib/win32/microsoft/ -lmclcommain \
+  #        -L$${MATLAB_DIR}/lib/win32/microsoft/ -lmclxlmain
+
 }
 
 QT       += core gui

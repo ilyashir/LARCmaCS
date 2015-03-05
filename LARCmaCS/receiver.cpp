@@ -78,7 +78,11 @@ void ReceiverWorker::run()
             }
             // [End] Ball info
 
+            if (mainalgisfree){
+                mainalgisfree = false;
+            }
             emit activate(packetssl);
+            //emit activateGUI(packetssl);
         }
     }
 

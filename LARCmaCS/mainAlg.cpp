@@ -101,6 +101,9 @@ void MainAlgWorker::init(){
 
     }
 
+    MlData pml(rcconfig);
+    fmldata = pml;
+
     MlData mtl(rcconfig);
     fmldata = mtl;
 

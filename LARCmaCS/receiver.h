@@ -22,12 +22,15 @@ public slots:
         shutdownread = false;
         cout << "Receiver worker start" << endl;
         run();
-    }
+    }    
 
     void stop() { shutdownread = true; }
 
+    void mainAlgFree() { mainalgisfree = true; }
+
 signals:
     void activate(PacketSSL packetssl);
+    void activateGUI(PacketSSL packetssl);
 
 private:
     void run();
@@ -35,6 +38,7 @@ private:
     RoboCupSSLClient client;
     SSL_WrapperPacket packet;
     bool shutdownread;
+    bool mainalgisfree;
 };
 
 struct Receiver : public QObject
