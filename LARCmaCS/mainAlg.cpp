@@ -160,6 +160,7 @@ void MainAlgWorker::run(PacketSSL packetssl)
     if(!shutdowncomp && fmtlab)
         cout << "Packet is received!" << endl;
 
+
     // [Start] Debug printing arrays from pocketssl
 //    cout << "Balls array is: ";
 //    for (int i = 0; i < sizeof(packetssl.balls) / sizeof(packetssl.balls[0]); i++)
@@ -199,21 +200,24 @@ void MainAlgWorker::run(PacketSSL packetssl)
 
     // [Start] Debug printing got ruleArray matrix
 
-    cout << "Rules in array form is:" << endl;
-//    for (int i = 0; i <fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH; i++) {
-//        cout << ruleArray[i] << " ";
-//    }
-//    cout << endl;
+//    cout << "Rules in array form is:" << endl;
+////    for (int i = 0; i <fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH; i++) {
+////        cout << ruleArray[i] << " ";
+////    }
+////    cout << endl;
 
-    cout << "Rules in matrix form is:" << endl;
-    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
-        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
-            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
-        }
-        cout << endl;
-    }
+//    cout << "Rules in matrix form is:" << endl;
+//    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
+//        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
+//            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
+//        }
+//        cout << endl;
+//    }
 
     // [End] Debug printing got ruleArray matrix
 
     emit sendToConnector(ruleArray);
+    emit mainAlgFree();
+    qDebug()<<"MainAlg!";
+
 }

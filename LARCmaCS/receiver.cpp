@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "receiver.h"
+#include <QtWidgets/QApplication>
 
 using namespace std;
 
@@ -77,11 +78,13 @@ void ReceiverWorker::run()
                 packetssl.robots_yellow[robot.robot_id() + 36] = robot.orientation();
             }
             // [End] Ball info
-
+            QApplication::processEvents();
             if (mainalgisfree){
+                emit activate(packetssl);
                 mainalgisfree = false;
+
             }
-            emit activate(packetssl);
+
             //emit activateGUI(packetssl);
         }
     }

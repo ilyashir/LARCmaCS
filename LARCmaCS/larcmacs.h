@@ -39,6 +39,13 @@ private:
 private slots:
     void updateView();
     void scaleView(int);
+    void on_initRobotsBtn_clicked();
+    void addRobot(QString);
+    void initEnded();
+
+signals:
+    void initRobots();
+    void stopInit();
 };
 
 #endif // LARCMACS_H

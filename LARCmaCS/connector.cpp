@@ -3,12 +3,17 @@
 
 #include "connector.h"
 
+#define UDP_ADDR QHostAddress("192.168.1.255")
+//#define UDP_ADDR QHostAddress::LocalHost
+
 void ConnectorWorker::start()
 {
     qDebug() << "Connector worker started";
     shutdownconnector = false;
+   // QApplication::processEvents();
     init();
 }
+
 
 void ConnectorWorker::stop()
 {
@@ -19,11 +24,13 @@ void ConnectorWorker::init()
 {
     qDebug() << "Initializing connector.worker";
 
+    connectedSockets=0;
     filename = "numMAC.txt";
 
     ipFile = new QFile(filename);
     udpSocket = new QUdpSocket(this);
-    udpSocket->bind(QHostAddress::Any, 3000);
+    udpSocket->bind(UDP_ADDR, 3001);
+    //udpSocket->bind(QHostAddress::LocalHost, 3001);
 
     tcpSentCount = 0;
     tcpPort = 2000;
@@ -31,9 +38,31 @@ void ConnectorWorker::init()
 
     curRuleArray = new double[4 * 7]; // (временно) 5 - количество строк матрицы, 5 - длина каждой строки матрицы,
 
-    enabledRobotsSet.insert(3);
+    enabledRobotsSet.insert(1);
 
     gotPacketsNum = 0;
+
+    timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),SLOT(udpBroadcastRequestIP()));
+    //timer->start(500);
+    connect(udpSocket,SIGNAL(readyRead()),this,SLOT(udpProcessPendingDatagrams()));
+    connect(this, SIGNAL(receivedAddresses(QByteArray)), this, SLOT(getStringAddresses(QByteArray)));
+    connect(this, SIGNAL(gotStringAddresses(QByteArray)), this, SLOT(addIpToMap(QByteArray)));
+    connect(this, SIGNAL(allNeededRobotsEnabled()), this, SLOT(doTcpWork()));
+}
+
+void ConnectorWorker::stopBroadcast()
+{
+    qDebug()<<"BROADCAST STOPPED!";
+    timer->stop();
+   // if (curEnabledRobotsSet.size()>0)
+
+}
+
+void ConnectorWorker::startBroadcast()
+{
+    qDebug()<<"BROADCAST STARTED!";
+    timer->start(500);
 }
 
 void ConnectorWorker::run(double *gotRuleArray) {
@@ -44,22 +73,8 @@ void ConnectorWorker::run(double *gotRuleArray) {
 
     memcpy(curRuleArray, gotRuleArray, 4 * 7 * sizeof(double));
 
-    connect(this, SIGNAL(receivedAddresses(QByteArray)), this, SLOT(getStringAddresses(QByteArray)));
-    connect(this, SIGNAL(gotStringAddresses(QByteArray)), this, SLOT(addIpToMap(QByteArray)));
-    connect(this, SIGNAL(allNeededRobotsEnabled()), this, SLOT(doTcpWork()));
-
-    if (curEnabledRobotsSet == enabledRobotsSet)
+    if (connectedAllSocketsFlag)
         doTcpWork();
-    else {
-        if (udpSocket->state() != QAbstractSocket::BoundState) { // if udpConnection should be established, check them
-            qDebug() << "UDP connection not established. Try again later";
-            qDebug() << "udpSocket state is" << udpSocket->state();
-            return;
-        }
-
-        udpBroadcastRequestIP();
-        udpProcessPendingDatagrams();
-    }
 }
 
 void ConnectorWorker::udpBroadcastRequestIP()
@@ -69,8 +84,7 @@ void ConnectorWorker::udpBroadcastRequestIP()
     QByteArray datagram = "requestIP";
 
     for (int i = 0; i < 1; i++) {
-//        udpSocket->writeDatagram(datagram.data(), datagram.size(), QHostAddress::LocalHost, 3000); // for localhost
-        udpSocket->writeDatagram(datagram.data(), datagram.size(), QHostAddress("192.168.1.255"), 3000); // for local network (DeathStar)
+        udpSocket->writeDatagram(datagram.data(), datagram.size(), UDP_ADDR, 3000);
     }
 }
 
@@ -90,17 +104,9 @@ void ConnectorWorker::udpProcessPendingDatagrams()
 
         if (datagram.size() == 10) {
             qDebug() << "Got message of 10 symbols";
-            emit receivedAddresses(datagram);
+            getStringAddresses(datagram);
         }
-
-        emit receivedDatagram(datagram);
     }
-
-//    if (curEnabledRobotsSet != enabledRobotsSet) {
-//        qDebug() << "Waiting for pending datagrams from thread" << QThread::currentThread();
-//        QThread::sleep(2); // 2 second wait for servers' answers
-//        udpProcessPendingDatagrams();
-//    }
 }
 
 // Get string MAC and IP datagram from byte MAC and IP of a specific robot
@@ -125,6 +131,7 @@ void ConnectorWorker::getStringAddresses(QByteArray byteAddressDatagram)
     QString macString = macByte.toHex();
     qDebug() << "MAC is" << macString;
 
+
     QByteArray stringAddressDatagram;
     stringAddressDatagram.append(macString + " " + ipString);
 
@@ -146,14 +153,16 @@ void ConnectorWorker::addIpToMap(QByteArray datagram)
             QString line = fileIn.readLine();
             int robotNum = (line.split(" ").value(0)).toInt();
             QString mac = line.split(" ").value(1);
-
-            if (mac == macAddr && (enabledRobotsSet.find(robotNum) != enabledRobotsSet.end())) {
+            qDebug()<<"--------------MAC FROM FILE: "<<mac;
+            if (!mac.compare(macAddr) && (enabledRobotsSet.find(robotNum) != enabledRobotsSet.end())
+                    && (curEnabledRobotsSet.find(robotNum) == curEnabledRobotsSet.end())) {
                 qDebug() << "Now will be added: robotNum:" << robotNum << "macAddr" << macAddr << "IPAddr:" << ipAddr;
 
                 robotAddrMap.insert(std::pair<int const, QString>(robotNum, ipAddr));
 
                 curEnabledRobotsSet.insert(robotNum);
 
+                emit robotAdded(QString::number(robotNum)+QString(" ")+macAddr);
                 dFound = 1;
                 break;
             }
@@ -176,8 +185,10 @@ void ConnectorWorker::addIpToMap(QByteArray datagram)
 
     if (curEnabledRobotsSet == enabledRobotsSet) {
         qDebug() << "Got all enabled robots' IPs";
-//        udpSocket->close();
+
+        timer->stop();
         emit allNeededRobotsEnabled();
+        initTcpConnections();
     }
     else
         qDebug() << "Got not all enabled robot's IPs";
@@ -188,20 +199,26 @@ void ConnectorWorker::initTcpConnections()
     qDebug() << "Initing tcp";
     for(map<int const, QString>::const_iterator robotAddrMapIter = robotAddrMap.begin(); robotAddrMapIter != robotAddrMap.end(); robotAddrMapIter++) {
         QTcpSocket *newSocket = new QTcpSocket();
+        connect(newSocket,SIGNAL(connected()),this,SLOT(tcpConnected()));
         newSocket->connectToHost(robotAddrMapIter->second, tcpPort);
         socketVector.push_back(newSocket);
     }
+}
 
-    while(!connectedAllSocketsFlag)
-        connectedAllSocketsFlag = checkAllSockets();
+void ConnectorWorker::tcpConnected()
+{
+    if (++connectedSockets == curEnabledRobotsSet.size())
+    {
+
+        connectedAllSocketsFlag = true;
+    }
 }
 
 void ConnectorWorker::doTcpWork()
 {
-    if (!connectedAllSocketsFlag)
-        initTcpConnections();
 
     sendRuleToAllSockets();
+    qDebug()<<"TCP SENDING";
 }
 
 bool ConnectorWorker::checkAllSockets()
@@ -209,7 +226,8 @@ bool ConnectorWorker::checkAllSockets()
     vector<QTcpSocket *>::const_iterator iter;
     int i;
     for(iter = socketVector.begin(), i = 0; iter != socketVector.end() && i < socketVector.size(); iter++, i++) {
-        (*iter)->waitForConnected(2000); // timeout 2s for example
+        //(*iter)->waitForConnected(2000); // timeout 2s for example
+        //(QTcpSocket*)(*iter)->wa
 
 
         if ((*iter)->state() != QAbstractSocket::ConnectedState) {

@@ -61,6 +61,29 @@
     <string>10</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="initRobotsBtn">
+   <property name="geometry">
+    <rect>
+     <x>100</x>
+     <y>490</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="robotsList">
+   <property name="geometry">
+    <rect>
+     <x>200</x>
+     <y>490</y>
+     <width>181</width>
+     <height>91</height>
+    </rect>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

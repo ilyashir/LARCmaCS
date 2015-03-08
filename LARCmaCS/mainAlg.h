@@ -7,6 +7,7 @@
 #include "packetSSL.h"
 #include <iostream>
 #include "mlData.h"
+#include <QDebug>
 
 using namespace std;
 
@@ -19,6 +20,7 @@ public:
 
 signals:
     void sendToConnector(double *ruleArray);
+    void mainAlgFree();
 
 public slots:
     void start()

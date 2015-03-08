@@ -10,6 +10,7 @@
 
 #include <QtCore>
 #include <QtNetwork>
+#include <QTimer>
 
 using std::map;
 using std::vector;
@@ -76,6 +77,9 @@ public:
     int connectedAllSocketsFlag;
 
     int gotPacketsNum;
+    QTimer* timer;
+
+    int connectedSockets;
 
 
 signals:
@@ -84,8 +88,11 @@ signals:
     void gotStringAddresses(QByteArray stringAddressDatagram);
     void allNeededRobotsEnabled();
     void allTasksDone();
+    void robotAdded(QString);
 
 public slots:
+    void init();
+
     void start();
     void stop();
     void run(double *ruleArray);
@@ -102,8 +109,13 @@ public slots:
     void printRobotAddrMap();
     void printSet(std::set<int> givenSet);
 
-private:
-    void init();
+    void stopBroadcast();
+    void startBroadcast();
+
+    void tcpConnected();
+
+//private:
+//    void init();
 };
 
 struct Connector : QObject

@@ -7,6 +7,8 @@
 #include "packetSSL.h"
 #include "robocup_ssl_client.h"
 #include <iostream>
+#include <QDebug>
+
 
 using namespace std;
 
@@ -20,13 +22,14 @@ public slots:
     void start()
     {
         shutdownread = false;
+        mainalgisfree = true;
         cout << "Receiver worker start" << endl;
         run();
     }    
 
     void stop() { shutdownread = true; }
 
-    void mainAlgFree() { mainalgisfree = true; }
+    void mainAlgFree() { qDebug()<<"free!";mainalgisfree = true; }
 
 signals:
     void activate(PacketSSL packetssl);
