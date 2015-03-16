@@ -1,4 +1,7 @@
 [submodule "MLscripts"]
 path = MLscripts
 url = https://github.com/ReasonKO/MLscripts.git
- 
+
+[submodule "RFVision"]
+	path = RFVision
+	url = git://github.com/thedeepestreality/RF-Vision.git

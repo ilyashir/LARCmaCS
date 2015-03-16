@@ -1,5 +1,5 @@
 *.pdb
-/LARCmaCS/*.user
+/LARCmaCS/*.user*
 /LARCmaCS/Makefile*
 /bind/*
 /bin/*.exe
