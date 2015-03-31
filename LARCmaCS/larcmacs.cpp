@@ -15,20 +15,28 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     fieldscene = new FieldScene();
     ui->fieldView->setScene(fieldscene);
 
+    macsArray = new QString[12];
+
     receiver.init();
     mainalg.init();
     sceneview.init();
     connector.init();
 
+    //robots connect
     connect(this,SIGNAL(initRobots()),&connector.worker, SLOT(startBroadcast()));
     connect(this,SIGNAL(stopInit()),&connector.worker, SLOT(stopBroadcast()));
     connect(&connector.worker,SIGNAL(robotAdded(QString)),this,SLOT(addRobot(QString)));
     connect(&connector.worker,SIGNAL(allNeededRobotsEnabled()),this,SLOT(initEnded()));
-    //ui->robotsList->add
+
+    //algorithm connect
     connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
     connect(&mainalg.worker, SIGNAL(mainAlgFree()), &receiver.worker, SLOT(mainAlgFree()));
-//    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
+
+    //send command to robots
     connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
+
+    //gui connector
+    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
     connect(&sceneview.worker, SIGNAL(updateView()), this, SLOT(updateView()));
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
 
@@ -93,11 +101,16 @@ void LARCmaCS::on_initRobotsBtn_clicked()
     if (!ui->initRobotsBtn->text().compare("Start"))
     {
         emit initRobots();
+      //  ui->robotsList->
         ui->initRobotsBtn->setText("Stop");
     }
     else
     {
         emit stopInit();
+//        for (int i=0;i<ui->robotsList->count();++i)
+//        {
+//            macsArray[i] = ui->robotsList->item(i)->text();
+//        }
         ui->initRobotsBtn->setText("Start");
     }
 }

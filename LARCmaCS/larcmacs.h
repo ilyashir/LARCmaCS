@@ -23,6 +23,7 @@ public:
     ~LARCmaCS();
 
     FieldScene *fieldscene;
+    QString * macsArray;
 
 protected:
     bool scalingRequested;

@@ -11,10 +11,13 @@ void sceneViewWorker::run(){
 //        cout << "signal updateView" << endl;
         emit updateView();
         QApplication::processEvents();
+        Sleep(1);
     }
 
 }
 
-void sceneViewWorker::repaintScene(){
-    cout << "yep! repain" << endl;
+void sceneViewWorker::repaintScene(PacketSSL packetssl){
+   // cout << "yep! repain" << endl;
+    emit updateRobots();
+    QApplication::processEvents();
 }

@@ -81,11 +81,15 @@ void ReceiverWorker::run()
             QApplication::processEvents();
             if (mainalgisfree){
                 emit activate(packetssl);
+                emit activateGUI(packetssl);
                 mainalgisfree = false;
 
             }
 
-            //emit activateGUI(packetssl);
+        }
+        else
+        {
+            Sleep(1);
         }
     }
 

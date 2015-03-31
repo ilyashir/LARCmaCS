@@ -23,10 +23,11 @@ public slots:
     }
 
     void stop() { shutdownview = true; }
-    void repaintScene();
+    void repaintScene(PacketSSL packetssl);
 
 signals:
     void updateView();
+    void updateRobots();
 
 private:
     void run();

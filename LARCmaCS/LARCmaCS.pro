@@ -32,9 +32,11 @@ win32 {
   LIBS += -L$$PWD/../lib/ -llibprotobuf$${SUFFIX_STR} \
           -lws2_32
 
-  LIBS += -L$${LIB_DIR}/lib/win64/microsoft/ -llibeng \
-          -L$${LIB_DIR}/lib/win64/microsoft/ -llibmat \
-          -L$${LIB_DIR}/lib/win64/microsoft/ -llibmx
+  LIBS += -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibeng \
+          -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibmat \
+          -L$${MATLAB_DIR}/lib/win32/microsoft/ -llibmx
+
+
 }
 
 QT       += core gui
@@ -52,7 +54,7 @@ INCLUDEPATH += \
   $${SHARED_DIR}/proto/cpp \
   $${SHARED_DIR}/util \
   $${SHARED_DIR}/rfprotocol \
-  $${SHARED_DIR}/ml \
+  $${MATLAB_DIR}/include \
   $${SHARED_DIR}/vartypes
 
 SOURCES += main.cpp\
@@ -67,8 +69,6 @@ SOURCES += main.cpp\
     connector.cpp
 
 HEADERS  += \
-  $${SHARED_DIR}/ml/engine.h \
-  $${SHARED_DIR}/ml/matrix.h \
   $${SHARED_DIR}/net/netraw.h \
   $${SHARED_DIR}/net/robocup_ssl_client.h \
   $${SHARED_DIR}/net/Pipe.h \
