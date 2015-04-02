@@ -10,7 +10,7 @@
 #include "connector.h"
 #include "BTtransmitter.h"
 #include "BTform.h"
-
+#include "WiFiForm.h"
 namespace Ui
 {
     class LARCmaCS;
@@ -21,11 +21,14 @@ class LARCmaCS : public QWidget
     Q_OBJECT
 
 public:
+
+    WifiForm wifiform;
     BTform btform;
     explicit LARCmaCS(QWidget *parent = 0);
     ~LARCmaCS();
 
     FieldScene *fieldscene;
+    QString * macsArray;
 
 protected:    
     BTtransmitter bttransmitter;
@@ -44,9 +47,30 @@ private:
 private slots:
     void UpdateSSLFPS(QString message);
     void UpdateStatusBar(QString message);
+    void UpdatePipeStatus(bool status);
+    void UpdatePauseState(int status);
     void updateView();
     void scaleView(int);
     void on_pushButton_clicked();
+
+private slots:
+    //void on_initRobotsBtn_clicked();
+    //void addRobot(QString);
+    //void initEnded();
+    void PickWifiRobot(QString addr);
+
+    void on_pushButton_Pause_clicked();
+
+    void on_pushButton_2_clicked();
+
+
+    void on_PickRobot_pushButton_clicked();
+
+signals:
+    //void initRobots();
+    //void stopInit();
+    void MatlabPause();
+    void MatlabChangeDirrectory(QString dir);
 };
 
 #endif // LARCMACS_H

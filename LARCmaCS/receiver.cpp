@@ -84,16 +84,17 @@ void ReceiverWorker::run()
             {
                 mainalgisfree=false;
                 emit activateMA(packetssl);
+                emit activateGUI(packetssl);
             }
-            emit activate(packetssl);
         }
         else           
-        {            
+        {
+            // no messages...
             Sleep(1);
         }
-        if (clock()-mt>CLOCKS_PER_SEC)
+        if (clock()-timer_m>CLOCKS_PER_SEC)
         {
-            mt=clock();
+            timer_m=clock();
             QString temp;
             QString ToStatus="FPS=";
             temp.setNum(Time_count);

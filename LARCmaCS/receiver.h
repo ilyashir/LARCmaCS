@@ -17,10 +17,10 @@ struct ReceiverWorker : public QObject
 {
     Q_OBJECT
 public:
-    explicit ReceiverWorker() {mainalgisfree=true;mt=clock(); Time_count=0;}
+    explicit ReceiverWorker() {mainalgisfree=true;timer_m=clock(); Time_count=0;}
 private:
     bool mainalgisfree;
-    clock_t mt;
+    clock_t timer_m;
     int Time_count;
 public slots:
     void MainAlgFree(){mainalgisfree=true;}
@@ -34,7 +34,7 @@ public slots:
     void stop() { shutdownread = true; }
 
 signals:
-    void activate(PacketSSL packetssl);
+    void activateGUI(PacketSSL packetssl);
     void activateMA(PacketSSL packetssl);
     void UpdateSSLFPS(QString message);
 

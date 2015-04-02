@@ -16,6 +16,8 @@ void sceneViewWorker::run(){
 
 }
 
-void sceneViewWorker::repaintScene(){
-    cout << "yep! repain" << endl;
+void sceneViewWorker::repaintScene(PacketSSL packetssl){
+   // cout << "yep! repain" << endl;
+    emit updateRobots();
+    QApplication::processEvents();
 }

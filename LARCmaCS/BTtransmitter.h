@@ -12,6 +12,7 @@
 #include <qlocalserver.h>
 #define BT_MESSAGE_SIZE 100
 
+#include <QDebug>
 
 #include <QQueue>
 class mess
@@ -51,7 +52,7 @@ public slots:
     void start()
     {
         shutdownview = false;
-        printf("<BTtransmitter>: worker started\n");
+        qDebug()<<"<BTtransmitter>: worker started";
         run();
     }
     void stop() { shutdownview = true; }
@@ -60,35 +61,38 @@ private:
     QLocalSocket * client;
     void SocketConnect();
 signals:
+    void UpdatePipeStatus(bool status);
 protected slots:
     void addmessage(char * message)
     {
         if (DispLog)
-            printf("<BTtransmitter>: New message to send \n");
+            qDebug()<<"<BTtransmitter>: New message to send";
         que.enqueue(mess(message));
         delete(message);
     }
     void connected()
     {
-        printf("<BTtransmitter>: New Connection\n");
+        qDebug()<<"<BTtransmitter>: New Connection, SUCCESS!";
         isconnected=true;
+        emit UpdatePipeStatus(true);
     }
     void disconnected()
     {
-        printf("<BTtransmitter>: Disconnected\n");
+        qDebug()<<"<BTtransmitter>: Disconnected";
         isconnected=false;
 //        client->disconnect();
-        client->abort();
+        client->abort();        
+        emit UpdatePipeStatus(false);
 //        client->reset();
     }    
-    void stateChanged ( QLocalSocket::LocalSocketState socketState)
-    {
-        printf("<BTtransmitter>: stateChanged\n");
-    }
-    void error ( QLocalSocket::LocalSocketError socketError )
-    {
-        printf("<BTtransmitter>: error\n");
-    }
+    //void stateChanged ( QLocalSocket::LocalSocketState socketState)
+    //{
+    //    qDebug()<<"<BTtransmitter>: stateChanged";
+    //}
+    //void error ( QLocalSocket::LocalSocketError socketError )
+    //{
+    //    qDebug()<<"<BTtransmitter>: error";
+    //}
 private:
     void run();
     bool shutdownview;
@@ -111,7 +115,7 @@ public:
     void init()
     {
         worker.moveToThread(&thread);
-        printf("<BTtransmitter> init ok\n");
+        qDebug()<<("<BTtransmitter> init ok\n");
         connect(this, SIGNAL(wstart()), &worker, SLOT(start()));
         connect(this, SIGNAL(wstop()), &worker, SLOT(stop()));
         connect(&thread, SIGNAL(finished()), &worker, SLOT(deleteLater()));
@@ -120,7 +124,7 @@ public:
     void start()
     {
         thread.start();
-        printf("<BTtransmitter> thread started\n");
+        qDebug()<<("<BTtransmitter> thread started\n");
         emit wstart();
     }
 

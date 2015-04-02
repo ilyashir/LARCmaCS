@@ -8,18 +8,21 @@
 void BTtransmitterWorker::run()
 {
     isconnected=false;
-    DispLog=true;
     client = new QLocalSocket();
     connect(client,SIGNAL(connected()),this,SLOT(connected()));
     connect(client,SIGNAL(disconnected()),this,SLOT(disconnected()));
-    //connect(client,SIGNAL(error ( QLocalSocket::LocalSocketError socketError )),
-    //        this,SLOT(error ( QLocalSocket::LocalSocketError socketError )));
-    //connect(client,SIGNAL(stateChanged ( QLocalSocket::LocalSocketState socketState )),
-    //        this,SLOT(stateChanged ( QLocalSocket::LocalSocketState socketState )));
+    //connect(client,SIGNAL(error ( QLocalSocket::LocalSocketError)),
+    //        this,SLOT(error ( QLocalSocket::LocalSocketError)));
+    //connect(client,SIGNAL(stateChanged ( QLocalSocket::LocalSocketState )),
+    //        this,SLOT(stateChanged ( QLocalSocket::LocalSocketState)));
     while (1)
     {
-        printf("<BTtransmitter>: White connect...\n");
-        SocketConnect();
+        qDebug()<<"<BTtransmitter>: White connect...";
+        while(isconnected==false)
+        {
+           Sleep(100);
+           SocketConnect();
+        }
         while(isconnected)
         {
             if (!que.empty())
@@ -35,7 +38,6 @@ void BTtransmitterWorker::run()
                 QApplication::processEvents();
             }
         }
-        Sleep(1000);
     }
 
 }
@@ -53,27 +55,26 @@ bool BTtransmitterWorker::write(char * message)
         printf("...................QLocalSocket::ConnectedState\n");
     if (state==QLocalSocket::ClosingState)
         printf("...................QLocalSocket::ClosingState\n");*/
-    qDebug() << "Element:" << message;
+    if (DispLog) qDebug() << "Element:" << message;
     if (client->isWritable())
     {
-        if (DispLog) printf("Wtire : ");
         qint64 re=client->write(message,BT_MESSAGE_SIZE );
         if (re>0)
         {
             if (BT_MESSAGE_SIZE!=re)
-                printf("WARING! socket insufficient size buffer by write %d\n",re);
-            else if (DispLog) printf("OK\n");
+                 qDebug()<<"<BTtransmitter>: WARING! socket insufficient size buffer by write "<<re;
+            else if (DispLog) qDebug()<<("<BTtransmitter>: OK");
             return 1;
         }
         else
         {
-            if (DispLog) printf("Error_socket_write %d\n",re);
+            qDebug()<<"<BTtransmitter>: Error writing to socket #"<<re;
             return 0;
         }
     }
     else
     {
-        if (DispLog) printf("Error, socket is not Writable\n");
+        qDebug()<<"<BTtransmitter>: Error, socket is not Writable";
         return 0;
     }
 }

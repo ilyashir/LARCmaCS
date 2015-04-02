@@ -15,17 +15,21 @@ using namespace std;
 struct MainAlgWorker : public QObject
 {
     Q_OBJECT
-    clock_t t,st,mt,maxt;
+    clock_t timer,timer_s,timer_m,timer_max;
     int Time_count;
 public:
-    explicit MainAlgWorker(){st=0; mt=clock(); Time_count=0;}
+    explicit MainAlgWorker(){
+        timer_s=0;
+        timer_m=clock();
+        Time_count=0;
+    }
 
 signals:
     void sendToConnector(double *ruleArray);
     void sendToBTtransmitter(char * message);
-    void ForvardReciver();
+    void mainAlgFree();
     void StatusMessage(QString message);
-
+    void UpdatePauseState(int state);
 public slots:
     void start()
     {
@@ -35,9 +39,9 @@ public slots:
     }
 
     void stop() { shutdowncomp = true; }
-
+    void ChangeDirrectory(QString dir);
     void run(PacketSSL packetssl);
-
+    void Pause();
     void run_matlab();
     void stop_matlab();
 

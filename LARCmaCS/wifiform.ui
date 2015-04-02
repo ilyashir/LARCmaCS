@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>WifiForm</class>
+ <widget class="QWidget" name="WifiForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>294</width>
+    <height>123</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>PickCurrentRobot</string>
+  </property>
+  <widget class="QListWidget" name="robotsList">
+   <property name="geometry">
+    <rect>
+     <x>90</x>
+     <y>20</y>
+     <width>181</width>
+     <height>91</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>123:145:1235</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>15dg&quot;25&quot;1ew</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>&quot;4123</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Новый элемент1</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Новый элемент2</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Новый элемент3</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Новый элемент4</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QPushButton" name="initRobotsBtn">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>20</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Start</string>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
