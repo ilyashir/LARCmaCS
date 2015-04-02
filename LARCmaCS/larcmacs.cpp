@@ -1,4 +1,4 @@
-#include <math.h>
+﻿#include <math.h>
 #include "larcmacs.h"
 #include "ui_larcmacs.h"
 #include "packetSSL.h"
@@ -21,18 +21,24 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connector.init();
     bttransmitter.init();
 
-    connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
+    connect(&receiver.worker, SIGNAL(activateMA(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
+    connect(&mainalg.worker, SIGNAL(ForvardReciver()), &receiver.worker, SLOT(MainAlgFree()));
 //    connect(&receiver.worker, SIGNAL(activate(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
-    connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
+    //connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
     connect(&sceneview.worker, SIGNAL(updateView()), this, SLOT(updateView()));
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
 
-    connect(&mainalg.worker,SIGNAL(sendToBTtransmitter(char *)),&bttransmitter.worker,SLOT(addmessage(char *)));
+    connect(&mainalg.worker, SIGNAL(StatusMessage(QString)), this, SLOT(UpdateStatusBar(QString)));
+    connect(&receiver.worker, SIGNAL(UpdateSSLFPS(QString)), this, SLOT(UpdateSSLFPS(QString)));
+
+    connect(&mainalg.worker,SIGNAL(sendToBTtransmitter(char*)),&bttransmitter.worker,SLOT(addmessage(char*)));
     sceneview.start();
     receiver.start();
     mainalg.start();
     connector.start();
     bttransmitter.start();
+    UpdateStatusBar("Waiting SSL connection...");
+    UpdateSSLFPS("FPS=0");
 }
 
 LARCmaCS::~LARCmaCS()
@@ -40,6 +46,14 @@ LARCmaCS::~LARCmaCS()
     delete ui;
 }
 
+void LARCmaCS::UpdateSSLFPS(QString message)
+{
+    ui->label_SSL_FPS->setText(message);
+}
+void LARCmaCS::UpdateStatusBar(QString message)
+{
+    ui->StatusLabel->setText(message);
+}
 void LARCmaCS::scaleView(int _sizescene)
 {
 //    cout << _sizescene << "  " << sizescene;

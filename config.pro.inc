@@ -21,7 +21,6 @@ SHARED_DIR = ../macsCommon
 LIB_DIR = ../lib
 DESTDIR = ../bin$${SUFFIX_STR}
 MATLAB_DIR = 'C:/Program Files (x86)/MATLAB/R2014a/extern/'
-#MATLAB_DIR = C:/MATLAB/R2009b/extern
 
 unix {
   DEFINES+=UNIX

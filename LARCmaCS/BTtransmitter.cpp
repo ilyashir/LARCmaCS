@@ -1,4 +1,4 @@
-#include "BTtransmitter.h"
+﻿#include "BTtransmitter.h"
 #include "Windows.h"
 
 #define PipeAdress "BTmodul"

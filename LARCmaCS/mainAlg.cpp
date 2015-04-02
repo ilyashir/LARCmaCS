@@ -1,4 +1,4 @@
-#include "mainAlg.h"
+﻿#include "mainAlg.h"
 #include <iostream>
 #include <fstream>
 //#include <TCHAR.H>
@@ -152,10 +152,13 @@ void MainAlgWorker::stop_matlab()
     fmtlab = false;
 }
 
+
 void MainAlgWorker::run(PacketSSL packetssl)
 {
-    if(!shutdowncomp && fmtlab)
-        cout << "Packet is received!" << endl;
+    t = clock();
+    Time_count++;
+//    if(!shutdowncomp && fmtlab)
+//        cout << "Packet is received!" << endl;
 
     // [Start] Debug printing arrays from pocketssl
 //    cout << "Balls array is: ";
@@ -187,7 +190,7 @@ void MainAlgWorker::run(PacketSSL packetssl)
     fmldata.Rule = engGetVariable(fmldata.ep, "Rules");
 
     char sendString[256];
-    sprintf(sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
+    sprintf(sendString, "Rules=zeros(%d, %d);", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
     engEvalString(fmldata.ep, sendString);
 
     double *ruleArray = (double *)malloc(fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
@@ -196,7 +199,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
 
     // [Start] Debug printing got ruleArray matrix
 
-    cout << "Rules in array form is:" << endl;
+//    cout << "Rules in array form is:" << endl;
+
 //    for (int i = 0; i <fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH; i++) {
 //        cout << ruleArray[i] << " ";
 //    }
@@ -210,18 +214,54 @@ void MainAlgWorker::run(PacketSSL packetssl)
         cout << endl;
     }
 */
-    cout << "Rules in matrix form is:" << endl;
+//    cout << "Rules in matrix form is:" << endl;
     for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
-        char newmess[10];
+        char newmess[100];
         for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
             newmess[j]=ruleArray[j * fmldata.config.RULE_AMOUNT + i];
-            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
+            //cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
         }
         if (newmess[0]==1)
-            sendToBTtransmitter(newmess);
-        cout << endl;
+        {
+            //cout << "GOMESS"<<endl;
+
+            char * newmessage=new char[100];
+            memcpy(newmessage,newmess,100);
+            emit sendToBTtransmitter(newmessage);
+        }
+//        cout << endl;
     }
     // [End] Debug printing got ruleArray matrix
 
-    emit sendToConnector(ruleArray);
+    //emit sendToConnector(ruleArray);
+    clock_t dt=clock()-t;
+    if (dt>maxt)
+        maxt=dt;
+    st=st+dt;
+    if (clock()-mt>CLOCKS_PER_SEC)
+    {
+        mt=clock();
+        QString temp;
+        QString ToStatus="Using Matlab: Count=";
+        temp.setNum(Time_count);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" ~time=";
+        temp.setNum(st/Time_count);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" maxtime=";
+        temp.setNum(maxt);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" ~fulltime=";
+        temp.setNum(st);
+        ToStatus=ToStatus+temp;
+
+        st=0;
+        maxt=0;
+        Time_count=0;
+        emit StatusMessage(ToStatus);
+    }
+    emit ForvardReciver();
 }

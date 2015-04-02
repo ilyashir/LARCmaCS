@@ -1,4 +1,4 @@
-#ifndef LARCMACS_H
+﻿#ifndef LARCMACS_H
 #define LARCMACS_H
 
 #include <QWidget>
@@ -35,12 +35,15 @@ protected:
     MainAlg mainalg;
     Connector connector;
 
+
 private:
     Ui::LARCmaCS *ui;
     float drawscale;
     qreal sizescene;
 
 private slots:
+    void UpdateSSLFPS(QString message);
+    void UpdateStatusBar(QString message);
     void updateView();
     void scaleView(int);
     void on_pushButton_clicked();

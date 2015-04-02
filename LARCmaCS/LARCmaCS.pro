@@ -8,7 +8,7 @@
 include( ../config.pro.inc )
 
 #qextserialport for  BTtransmitter
-include(../LARCmaCS/src/qextserialport.pri)
+include(../LARCmaCS/src/qextserialport/qextserialport.pri)
 
 #where to place built objects
 OBJECTS_DIR = ../build/LARCmaCS/obj$${SUFFIX_STR}
@@ -48,7 +48,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = LARCmaCS
 TEMPLATE = app
 
-INCLUDEPATH +='C:\Program Files (x86)\MATLAB\R2014a\bin\win32'
+INCLUDEPATH +='C:\Program Files (x86)\MATLAB\R2008a\bin\win32'
 
 #directories of sources of the vision client
 

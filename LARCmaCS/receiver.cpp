@@ -1,6 +1,7 @@
-#include <iostream>
+﻿#include <iostream>
 
 #include "receiver.h"
+#include <QtWidgets/QApplication>
 
 using namespace std;
 
@@ -27,8 +28,9 @@ void ReceiverWorker::run()
 
     while (!shutdownread) {
         if (client.receive(packet) && packet.has_detection()) {
+            Time_count++;
             packetsNum++;
-            cout << "Num RECEIVER:" << packetsNum << endl;
+            //cout << "Num RECEIVER:" << packetsNum << endl;
 
             PacketSSL packetssl;
             qRegisterMetaType<PacketSSL>("PacketSSL"); // for queueing arguments between threads
@@ -77,12 +79,30 @@ void ReceiverWorker::run()
                 packetssl.robots_yellow[robot.robot_id() + 36] = robot.orientation();
             }
             // [End] Ball info
-
+            QApplication::processEvents();
+            if (mainalgisfree)
+            {
+                mainalgisfree=false;
+                emit activateMA(packetssl);
+            }
             emit activate(packetssl);
         }
-        else
-        {
+        else           
+        {            
             Sleep(1);
+        }
+        if (clock()-mt>CLOCKS_PER_SEC)
+        {
+            mt=clock();
+            QString temp;
+            QString ToStatus="FPS=";
+            temp.setNum(Time_count);
+            ToStatus=ToStatus+temp;
+            ToStatus=ToStatus+"; Count=";
+            temp.setNum(packetsNum);
+            ToStatus=ToStatus+temp;
+            Time_count=0;
+            emit UpdateSSLFPS(ToStatus);
         }
     }
 

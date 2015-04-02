@@ -1,4 +1,4 @@
-#ifndef MAINALG_H
+﻿#ifndef MAINALG_H
 #define MAINALG_H
 
 #include <QObject>
@@ -7,19 +7,24 @@
 #include "packetSSL.h"
 #include <iostream>
 #include "mlData.h"
+//#include "BTtransmitter.h"
 
 using namespace std;
+#include <time.h>       /* clock_t, clock(), CLOCKS_PER_SEC */
 
 struct MainAlgWorker : public QObject
 {
     Q_OBJECT
-
+    clock_t t,st,mt,maxt;
+    int Time_count;
 public:
-    explicit MainAlgWorker(){}
+    explicit MainAlgWorker(){st=0; mt=clock(); Time_count=0;}
 
 signals:
     void sendToConnector(double *ruleArray);
     void sendToBTtransmitter(char * message);
+    void ForvardReciver();
+    void StatusMessage(QString message);
 
 public slots:
     void start()

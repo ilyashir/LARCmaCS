@@ -1,4 +1,4 @@
-#ifndef BTTRANSMITTER_H
+﻿#ifndef BTTRANSMITTER_H
 #define BTTRANSMITTER_H
 
 //-----------------------------------------------------
@@ -14,27 +14,39 @@
 
 
 #include <QQueue>
-struct mess
+class mess
 {
+public:
     char s[BT_MESSAGE_SIZE];
     mess(char * s_)
     {
         memcpy(s,s_,BT_MESSAGE_SIZE);
+    }
+    mess(mess * copy)
+    {
+        memcpy(s,copy->s,BT_MESSAGE_SIZE);
+    }
+    mess(mess const& copy)
+    {
+        memcpy(s,copy.s,BT_MESSAGE_SIZE);
     }
 };
 
 class BTtransmitterWorker : public QThread
 {
     Q_OBJECT
+private:
+    QQueue<mess> que;
 public:
     bool DispLog;
     bool isconnected;
+public:
     explicit BTtransmitterWorker()
-    {}
+    {
+        DispLog=false;
+    }
     ~BTtransmitterWorker()
     {client->disconnectFromServer();}
-private:
-    QQueue<mess> que;
 public slots:
     void start()
     {
@@ -51,8 +63,10 @@ signals:
 protected slots:
     void addmessage(char * message)
     {
-        if (DispLog) printf("<BTtransmitter>: New message to send\n");
+        if (DispLog)
+            printf("<BTtransmitter>: New message to send \n");
         que.enqueue(mess(message));
+        delete(message);
     }
     void connected()
     {
@@ -79,6 +93,9 @@ private:
     void run();
     bool shutdownview;
 };
+
+
+
 
 
 class BTtransmitter : public QThread
