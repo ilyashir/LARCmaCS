@@ -47,6 +47,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(&mainalg.worker, SIGNAL(mainAlgFree()), &receiver.worker, SLOT(MainAlgFree()));
 
     //send command to robots
+    connect(this,SIGNAL(receiveMacArray(QString*)),&connector.worker,SLOT(receiveMacArray(QString*)));
     connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
 
     //gui connector
@@ -191,9 +192,11 @@ void LARCmaCS::on_PickRobot_pushButton_clicked()
 
 void LARCmaCS::PickWifiRobot(QString addr)
 {
+    wifiaddrdata[ui->RobotComboBox->currentIndex()]=addr;
     QString temp;
     temp.setNum(ui->RobotComboBox->currentIndex()+1);
     temp=temp+") "+addr;
     ui->RobotComboBox->setItemText(ui->RobotComboBox->currentIndex(),temp);
     qDebug()<<"PICK"<<addr;
+    emit receiveMacArray(wifiaddrdata);
 }

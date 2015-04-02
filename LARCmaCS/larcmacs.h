@@ -11,6 +11,9 @@
 #include "BTtransmitter.h"
 #include "BTform.h"
 #include "WiFiForm.h"
+
+#define NUM_CONTROL_ROBOTS 12
+
 namespace Ui
 {
     class LARCmaCS;
@@ -43,6 +46,7 @@ private:
     Ui::LARCmaCS *ui;
     float drawscale;
     qreal sizescene;
+    QString wifiaddrdata[NUM_CONTROL_ROBOTS];
 
 private slots:
     void UpdateSSLFPS(QString message);
@@ -69,6 +73,7 @@ private slots:
 signals:
     //void initRobots();
     //void stopInit();
+    void receiveMacArray(QString*);
     void MatlabPause();
     void MatlabChangeDirrectory(QString dir);
 };
