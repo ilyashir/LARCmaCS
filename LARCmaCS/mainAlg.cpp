@@ -280,8 +280,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
         Time_count=0;
         emit StatusMessage(ToStatus);
 
-        engEvalString(fmldata.ep,"itpause=RP.Pause");
-        mxArray *mxitpause=engGetVariable(fmldata.ep,"itpause");
+        engEvalString(fmldata.ep,"ispause=RP.Pause");
+        mxArray *mxitpause=engGetVariable(fmldata.ep,"ispause");
         if (mxitpause!=0)
         {
             double *itpause=mxGetPr(mxitpause);

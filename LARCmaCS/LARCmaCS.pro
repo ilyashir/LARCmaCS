@@ -48,7 +48,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = LARCmaCS
 TEMPLATE = app
 
-INCLUDEPATH +='C:\Program Files (x86)\MATLAB\R2008a\bin\win32'
 
 #directories of sources of the vision client
 
