@@ -63,7 +63,7 @@ public slots:
 
     void start();
     void stop();
-    void run(double *ruleArray);
+    void run(int N,QByteArray command);
     void udpBroadcastRequestIP();
     void udpProcessPendingDatagrams();
 

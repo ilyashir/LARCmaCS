@@ -95,7 +95,7 @@ void MainAlgWorker::init(){
         str = "main";
         rcconfig.file_of_matlab=str;
         rcconfig.RULE_AMOUNT=5;
-        rcconfig.RULE_LENGTH=5;
+        rcconfig.RULE_LENGTH=7;
         rcconfig.BACK_AMOUNT=10;
         rcconfig.BACK_LENGTH=8;
 
@@ -246,11 +246,21 @@ void MainAlgWorker::run(PacketSSL packetssl)
             char * newmessage=new char[100];
             memcpy(newmessage,newmess,100);
             emit sendToBTtransmitter(newmessage);
+
+            QByteArray command;
+            command.append(QString("rule ").toUtf8());
+            command.append(newmess[2]);
+            command.append(newmess[3]);
+            if (newmess[1]==0)
+                for (int i=1; i<=MAX_NUM_ROBOTS; i++)
+                    emit sendToConnector(i,command);
+            if ((newmess[1]>0) && (newmess[1]<=MAX_NUM_ROBOTS))
+                emit sendToConnector(newmess[1],command);
         }
 //        cout << endl;
     }
     // [End] Debug printing got ruleArray matrix
-    //emit sendToConnector(ruleArray);
+
     clock_t timer_c=clock()-timer;
     if (timer_c>timer_max)
         timer_max=timer_c;

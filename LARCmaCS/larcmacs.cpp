@@ -48,7 +48,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
 
     //send command to robots
     connect(this,SIGNAL(receiveMacArray(QString*)),&connector.worker,SLOT(receiveMacArray(QString*)));
-    connect(&mainalg.worker, SIGNAL(sendToConnector(double *)), &connector.worker, SLOT(run(double *)));
+    connect(&mainalg.worker, SIGNAL(sendToConnector(int,QByteArray)), &connector.worker, SLOT(run(int,QByteArray)));
 
     //gui connector
     connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));

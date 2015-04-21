@@ -9,6 +9,8 @@
 #include "mlData.h"
 //#include "BTtransmitter.h"
 
+#define MAX_NUM_ROBOTS 12
+
 using namespace std;
 #include <time.h>       /* clock_t, clock(), CLOCKS_PER_SEC */
 
@@ -25,7 +27,7 @@ public:
     }
 
 signals:
-    void sendToConnector(double *ruleArray);
+    void sendToConnector(int N,QByteArray command);
     void sendToBTtransmitter(char * message);
     void mainAlgFree();
     void StatusMessage(QString message);
