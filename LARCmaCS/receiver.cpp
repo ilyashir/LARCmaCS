@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 
 #include "receiver.h"
 #include <QtWidgets/QApplication>
@@ -28,8 +28,9 @@ void ReceiverWorker::run()
 
     while (!shutdownread) {
         if (client.receive(packet) && packet.has_detection()) {
+            Time_count++;
             packetsNum++;
-            cout << "Num RECEIVER:" << packetsNum << endl;
+            //cout << "Num RECEIVER:" << packetsNum << endl;
 
             PacketSSL packetssl;
             qRegisterMetaType<PacketSSL>("PacketSSL"); // for queueing arguments between threads
@@ -79,17 +80,30 @@ void ReceiverWorker::run()
             }
             // [End] Ball info
             QApplication::processEvents();
-            if (mainalgisfree){
-                emit activate(packetssl);
+            if (mainalgisfree)
+            {
+                mainalgisfree=false;
+                emit activateMA(packetssl);
                 emit activateGUI(packetssl);
-                mainalgisfree = false;
-
             }
-
         }
-        else
+        else           
         {
+            // no messages...
             Sleep(1);
+        }
+        if (clock()-timer_m>CLOCKS_PER_SEC)
+        {
+            timer_m=clock();
+            QString temp;
+            QString ToStatus="FPS=";
+            temp.setNum(Time_count);
+            ToStatus=ToStatus+temp;
+            ToStatus=ToStatus+"; Count=";
+            temp.setNum(packetsNum);
+            ToStatus=ToStatus+temp;
+            Time_count=0;
+            emit UpdateSSLFPS(ToStatus);
         }
     }
 

@@ -66,9 +66,11 @@ void ConnectorWorker::receiveMacArray(QString * macArray)
 {
     for (int i=0;i<12;++i)
     {
-        if (!macArray[i].compare(""))
-            numIP[i] = macIP[macArray[i]];
+        qDebug()<<macArray[i];
+        if (macArray[i].compare(""))
+            numIP[i+1] = macIP[macArray[i]];
     }
+    qDebug()<<numIP;
     connectedAllSocketsFlag = true;
 }
 
@@ -76,9 +78,7 @@ void ConnectorWorker::stopBroadcast()
 {
     qDebug()<<"BROADCAST STOPPED!";
     timer->stop();
-    //emit sendMacs(macList);
-    //connectedAllSocketsFlag = true;
-   // if (curEnabledRobotsSet.size()>0)
+
 
 }
 
@@ -88,20 +88,9 @@ void ConnectorWorker::startBroadcast()
     timer->start(500);
 }
 
-void ConnectorWorker::run(double *gotRuleArray) {
-
-    qDebug() << "Num CONNECTOR:" << gotPacketsNum++;
-
-    if (connectedAllSocketsFlag)
-    {
-        for (int i=0;i<4;++i)
-            if (gotRuleArray[i]!=0)
-            {
-                command[5] = gotRuleArray[i + 2*4]; // Left Motor
-                command[6] = gotRuleArray[i + 3*4]; // Right Motor
-                udpSocket->writeDatagram(command,QHostAddress(numIP[gotRuleArray[i+1*4]]),3001);
-            }
-    }
+void ConnectorWorker::run(int N, QByteArray command){
+    qDebug()<<N<<" "<<(int)command[5]<<(int)command[6];
+    udpSocket->writeDatagram(command,QHostAddress(numIP[N]),3001);
 }
 
 void ConnectorWorker::udpBroadcastRequestIP()

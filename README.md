@@ -2,4 +2,4 @@
 Learning Augmented Reality Control
 multi-agent Cybernetic Studio
 
-LARCmaCS - РїСЂРёР»РѕР¶РµРЅРёРµ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ РіСЂСѓРїРїРѕР№ СЂРѕР±РѕС‚РѕРІ РЅР° РїРѕР»Рµ. Р Р°Р±РѕС‚Р°РµС‚ РІ СЃРІСЏР·РєРµ СЃ СЃРёСЃС‚РµРјРѕР№ РІРёРґРµРѕР·СЂРµРЅРёСЏ RFVision(https://github.com/thedeepestreality/RF-Vision) Рё Р±РёР±Р»РёРѕС‚РµРєРѕР№ Р°Р»РіРѕСЂРёС‚РјРѕРІ СѓРїСЂР°РІР»РµРЅРёСЏ MLscripts(https://github.com/ReasonKO/MLscripts)
+LARCmaCS - приложение для управления группой роботов на поле. Работает в связке с системой видеозрения RFVision(https://github.com/thedeepestreality/RF-Vision) и библиотекой алгоритмов управления MLscripts(https://github.com/ReasonKO/MLscripts)

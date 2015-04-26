@@ -7,6 +7,9 @@
 #read the global configuration file
 include( ../config.pro.inc )
 
+#qextserialport for  BTtransmitter
+include(../LARCmaCS/src/qextserialport/qextserialport.pri)
+
 #where to place built objects
 OBJECTS_DIR = ../build/LARCmaCS/obj$${SUFFIX_STR}
 
@@ -47,6 +50,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = LARCmaCS
 TEMPLATE = app
 
+
 #directories of sources of the vision client
 
 INCLUDEPATH += \
@@ -66,7 +70,10 @@ SOURCES += main.cpp\
     receiver.cpp \
     mainAlg.cpp \
     mlData.cpp \
-    connector.cpp
+    connector.cpp \
+    BTtransmitter.cpp \
+    btform.cpp \
+    wifiform.cpp
 
 HEADERS  += \
   $${SHARED_DIR}/net/netraw.h \
@@ -83,6 +90,11 @@ HEADERS  += \
     receiver.h \
     mainAlg.h \
     mlData.h \
-    connector.h
+    connector.h \
+    BTtransmitter.h \
+    btform.h \
+    wifiform.h
 
-FORMS    += larcmacs.ui
+FORMS    += larcmacs.ui \
+    btform.ui \
+    wifiform.ui

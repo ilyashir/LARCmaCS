@@ -26,7 +26,8 @@ public slots:
     void repaintScene(PacketSSL packetssl);
 
 signals:
-    void updateView();
+    void updateView();    
+    void updateRobots();
     void updateRobots();
 
 private:

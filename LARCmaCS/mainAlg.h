@@ -1,4 +1,4 @@
-#ifndef MAINALG_H
+﻿#ifndef MAINALG_H
 #define MAINALG_H
 
 #include <QObject>
@@ -7,21 +7,30 @@
 #include "packetSSL.h"
 #include <iostream>
 #include "mlData.h"
-#include <QDebug>
+
+#define MAX_NUM_ROBOTS 12
 
 using namespace std;
+#include <time.h>       /* clock_t, clock(), CLOCKS_PER_SEC */
 
 struct MainAlgWorker : public QObject
 {
     Q_OBJECT
-
+    clock_t timer,timer_s,timer_m,timer_max;
+    int Time_count;
 public:
-    explicit MainAlgWorker(){}
+    explicit MainAlgWorker(){
+        timer_s=0;
+        timer_m=clock();
+        Time_count=0;
+    }
 
 signals:
-    void sendToConnector(double *ruleArray);
+    void sendToConnector(int N,QByteArray command);
+    void sendToBTtransmitter(char * message);
     void mainAlgFree();
-
+    void StatusMessage(QString message);
+    void UpdatePauseState(int state);
 public slots:
     void start()
     {
@@ -31,9 +40,9 @@ public slots:
     }
 
     void stop() { shutdowncomp = true; }
-
+    void ChangeDirrectory(QString dir);
     void run(PacketSSL packetssl);
-
+    void Pause();
     void run_matlab();
     void stop_matlab();
 

@@ -1,4 +1,4 @@
-#include "mainAlg.h"
+﻿#include "mainAlg.h"
 #include <iostream>
 #include <fstream>
 //#include <TCHAR.H>
@@ -95,14 +95,11 @@ void MainAlgWorker::init(){
         str = "main";
         rcconfig.file_of_matlab=str;
         rcconfig.RULE_AMOUNT=5;
-        rcconfig.RULE_LENGTH=5;
+        rcconfig.RULE_LENGTH=7;
         rcconfig.BACK_AMOUNT=10;
         rcconfig.BACK_LENGTH=8;
 
     }
-
-    MlData pml(rcconfig);
-    fmldata = pml;
 
     MlData mtl(rcconfig);
     fmldata = mtl;
@@ -122,13 +119,15 @@ void MainAlgWorker::run_matlab()
 
     m_buffer[255] = '\0';
     engOutputBuffer(fmldata.ep, m_buffer, 255);
+    printf("Matlab Engine is opened\n");
 
     // Path_Of_Files
-    TCHAR CurrentPath[MAX_PATH];
-    char StringWithPath[MAX_PATH],StringPath[MAX_PATH];
+   // TCHAR CurrentPath[MAX_PATH];
+   // char StringWithPath[MAX_PATH],StringPath[MAX_PATH];
 
+    /*
     // Detecting Directory
-    printf("Matlab Engine is opened\nStart to detect directory\n");
+    printf("Start to detect directory\n");
     GetCurrentDirectory(sizeof(CurrentPath), CurrentPath);
 
 #ifdef UNICODE
@@ -140,12 +139,12 @@ void MainAlgWorker::run_matlab()
     sprintf(StringWithPath, "cd %s;", StringPath);
     engEvalString(fmldata.ep, StringWithPath);
     printf("We are on %s\n",StringWithPath);
-
+*/
     //-----create Rules-----
     char sendString[256];
     sprintf (sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
     engEvalString(fmldata.ep, sendString);
-    engEvalString(fmldata.ep, "disp(1)");
+//    engEvalString(fmldata.ep, "disp(1)");
 
     fmtlab = true;
 }
@@ -154,29 +153,23 @@ void MainAlgWorker::stop_matlab()
 {
     fmtlab = false;
 }
+#include <qdebug.h>
+void MainAlgWorker::ChangeDirrectory(QString dir)
+{
+    char StringWithPath[MAX_PATH];
+    sprintf(StringWithPath, "cd %s;", dir.toUtf8().data());
+    engEvalString(fmldata.ep, StringWithPath);
+    printf("Yes directory %s\n",StringWithPath);
+}
 
+void MainAlgWorker::Pause()
+{
+    engEvalString(fmldata.ep, "PAUSE();");
+}
 void MainAlgWorker::run(PacketSSL packetssl)
 {
-    if(!shutdowncomp && fmtlab)
-        cout << "Packet is received!" << endl;
-
-
-    // [Start] Debug printing arrays from pocketssl
-//    cout << "Balls array is: ";
-//    for (int i = 0; i < sizeof(packetssl.balls) / sizeof(packetssl.balls[0]); i++)
-//        cout << packetssl.balls[i] << " # ";
-//    cout << endl;
-
-//    cout << "Blues array is: ";
-//    for (int i = 0; i < sizeof(packetssl.robots_blue) / sizeof(packetssl.robots_blue[0]); i++)
-//        cout << packetssl.robots_blue[i] << " | ";
-//    cout << endl;
-
-//    cout << "Yellows array is: ";
-//    for (int i = 0; i < sizeof(packetssl.robots_yellow) / sizeof(packetssl.robots_yellow[0]); i++)
-//        cout << packetssl.robots_yellow[i] << " # ";
-//    cout << endl;
-    // [End] Debug printing arrays from pocketssl
+    timer = clock();
+    Time_count++;
 
     memcpy(mxGetPr(fmldata.Ball), packetssl.balls, BALL_COUNT_d);
     memcpy(mxGetPr(fmldata.Blue), packetssl.robots_blue, TEAM_COUNT_d);
@@ -186,37 +179,102 @@ void MainAlgWorker::run(PacketSSL packetssl)
     engPutVariable(fmldata.ep, "Blues", fmldata.Blue);
     engPutVariable(fmldata.ep, "Yellows", fmldata.Yellow);
 
+
     engEvalString(fmldata.ep, fmldata.config.file_of_matlab);
 
     fmldata.Rule = engGetVariable(fmldata.ep, "Rules");
+    double *ruleArray = (double *)malloc(fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
+    if (fmldata.Rule!=0)
+        memcpy(ruleArray, mxGetPr(fmldata.Rule), fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
+    else
+        memset(ruleArray,0,fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
 
     char sendString[256];
-    sprintf(sendString, "Rules=zeros(%d, %d)", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
+    sprintf(sendString, "Rules=zeros(%d, %d);", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
     engEvalString(fmldata.ep, sendString);
 
-    double *ruleArray = (double *)malloc(fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
 
-    memcpy(ruleArray, mxGetPr(fmldata.Rule), fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
 
-    // [Start] Debug printing got ruleArray matrix
 
-//    cout << "Rules in array form is:" << endl;
-////    for (int i = 0; i <fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH; i++) {
-////        cout << ruleArray[i] << " ";
-////    }
-////    cout << endl;
 
-//    cout << "Rules in matrix form is:" << endl;
-//    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
-//        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
-//            cout << ruleArray[j * fmldata.config.RULE_AMOUNT + i] << " ";
-//        }
-//        cout << endl;
-//    }
 
-    // [End] Debug printing got ruleArray matrix
 
-    emit sendToConnector(ruleArray);
+    for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
+        char newmess[100];
+        for (int j = 0; j < fmldata.config.RULE_LENGTH; j++) {
+            newmess[j]=ruleArray[j * fmldata.config.RULE_AMOUNT + i];
+        }
+        if (newmess[0]==1)
+        {
+            char * newmessage=new char[100];
+            memcpy(newmessage,newmess,100);
+            emit sendToBTtransmitter(newmessage);
+
+            QByteArray command;
+            command.append(QString("rule ").toUtf8());
+            command.append(newmess[2]);
+            command.append(newmess[3]);
+            if (newmess[1]==0)
+                for (int i=1; i<=MAX_NUM_ROBOTS; i++)
+                    emit sendToConnector(i,command);
+            if ((newmess[1]>0) && (newmess[1]<=MAX_NUM_ROBOTS))
+                emit sendToConnector(newmess[1],command);
+        }
+    }
+
+    clock_t timer_c=clock()-timer;
+    if (timer_c>timer_max)
+        timer_max=timer_c;
+    timer_s=timer_s+timer_c;
+    if (clock()-timer_m>CLOCKS_PER_SEC)
+    {
+        timer_m=clock();
+        QString temp;
+        QString ToStatus="Using Matlab: Count=";
+        temp.setNum(Time_count);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" ~time=";
+        temp.setNum(timer_s/Time_count);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" maxtime=";
+        temp.setNum(timer_max);
+        ToStatus=ToStatus+temp;
+
+        ToStatus=ToStatus+" fulltime=";
+        temp.setNum(timer_s);
+        ToStatus=ToStatus+temp;
+
+        timer_s=0;
+        timer_max=0;
+        Time_count=0;
+        emit StatusMessage(ToStatus);
+
+        engEvalString(fmldata.ep,"ispause=RP.Pause");
+        mxArray *mxitpause=engGetVariable(fmldata.ep,"ispause");
+        if (mxitpause!=0)
+        {
+            double *itpause=mxGetPr(mxitpause);
+            if (itpause!=0)
+            {
+                if ((*itpause)==1)
+                    emit UpdatePauseState(1);
+                else
+                {
+                    if ((*itpause)==0)
+                        emit UpdatePauseState(0);
+                    else
+                        emit UpdatePauseState(-1);
+                }
+            }
+            else
+                emit UpdatePauseState(-2);
+        }
+        else
+            emit UpdatePauseState(-3);
+    }
+    emit mainAlgFree();
     emit mainAlgFree();
     qDebug()<<"MainAlg!";
 
