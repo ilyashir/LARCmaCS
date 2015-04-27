@@ -32,15 +32,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     // GUIS
     connect(&wifiform,SIGNAL(PickWifiRobot(QString)),this, SLOT(PickWifiRobot(QString)));
 
-    //robots connect
-    /*
-    connect(this,SIGNAL(initRobots()),&connector.worker, SLOT(startBroadcast()));
-    connect(this,SIGNAL(stopInit()),&connector.worker, SLOT(stopBroadcast()));
-    connect(&connector.worker,SIGNAL(robotAdded(QString)),this,SLOT(addRobot(QString)));
-    connect(&connector.worker,SIGNAL(allNeededRobotsEnabled()),this,SLOT(initEnded()));
-*/
     //algorithm connect
-
     connect(this, SIGNAL(MatlabChangeDirrectory(QString)),&mainalg.worker,SLOT(ChangeDirrectory(QString)));
     connect(this, SIGNAL(MatlabPause()), &mainalg.worker, SLOT(Pause()));
     connect(&receiver.worker, SIGNAL(activateMA(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
@@ -49,9 +41,6 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     //send command to robots
     connect(this,SIGNAL(receiveMacArray(QString*)),&connector.worker,SLOT(receiveMacArray(QString*)));
     connect(&mainalg.worker, SIGNAL(sendToConnector(int,QByteArray)), &connector.worker, SLOT(run(int,QByteArray)));
-
-    //gui connector
-    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
 
     //gui connector
     connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
@@ -180,13 +169,12 @@ void LARCmaCS::on_pushButton_Pause_clicked()
 }
 
 #include <QFileDialog>
-void LARCmaCS::on_pushButton_2_clicked()
+void LARCmaCS::on_pushButton_SetMLdir_clicked()
 {
     QString  s = QFileDialog::getExistingDirectory();
     qDebug()<<"New Matlab directory = "<<s;
     emit MatlabChangeDirrectory(s);
 }
-
 
 void LARCmaCS::on_PickRobot_pushButton_clicked()
 {
@@ -203,3 +191,5 @@ void LARCmaCS::PickWifiRobot(QString addr)
     qDebug()<<"PICK"<<addr;
     emit receiveMacArray(wifiaddrdata);
 }
+
+

@@ -28,7 +28,6 @@ public slots:
 signals:
     void updateView();    
     void updateRobots();
-    void updateRobots();
 
 private:
     void run();

@@ -24,37 +24,7 @@
    </property>
    <item>
     <property name="text">
-     <string>123:145:1235</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>15dg&quot;25&quot;1ew</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>&quot;4123</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Новый элемент1</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Новый элемент2</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Новый элемент3</string>
-    </property>
-   </item>
-   <item>
-    <property name="text">
-     <string>Новый элемент4</string>
+     <string>---empty---</string>
     </property>
    </item>
   </widget>

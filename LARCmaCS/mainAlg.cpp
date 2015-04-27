@@ -171,6 +171,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
     timer = clock();
     Time_count++;
 
+// Заполнение массивов Balls Blues и Yellows и запуск main-функции
+
     memcpy(mxGetPr(fmldata.Ball), packetssl.balls, BALL_COUNT_d);
     memcpy(mxGetPr(fmldata.Blue), packetssl.robots_blue, TEAM_COUNT_d);
     memcpy(mxGetPr(fmldata.Yellow), packetssl.robots_yellow, TEAM_COUNT_d);
@@ -181,6 +183,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
 
 
     engEvalString(fmldata.ep, fmldata.config.file_of_matlab);
+
+// Забираем Rules и очищаем его в воркспейсе
 
     fmldata.Rule = engGetVariable(fmldata.ep, "Rules");
     double *ruleArray = (double *)malloc(fmldata.config.RULE_AMOUNT * fmldata.config.RULE_LENGTH * sizeof(double));
@@ -193,11 +197,7 @@ void MainAlgWorker::run(PacketSSL packetssl)
     sprintf(sendString, "Rules=zeros(%d, %d);", fmldata.config.RULE_AMOUNT, fmldata.config.RULE_LENGTH);
     engEvalString(fmldata.ep, sendString);
 
-
-
-
-
-
+// Разбор пришедшего пакета и переправка его строк на connector и BT
 
     for (int i = 0; i < fmldata.config.RULE_AMOUNT; i++) {
         char newmess[100];
@@ -221,6 +221,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
                 emit sendToConnector(newmess[1],command);
         }
     }
+
+// Раз в секунду создание пакета статистики и переправка в GUI
 
     clock_t timer_c=clock()-timer;
     if (timer_c>timer_max)
@@ -274,8 +276,9 @@ void MainAlgWorker::run(PacketSSL packetssl)
         else
             emit UpdatePauseState(-3);
     }
+
+// Сообщение ресиверу о готовности обработки нового пакета.
     emit mainAlgFree();
-    emit mainAlgFree();
-    qDebug()<<"MainAlg!";
+//    qDebug()<<"MainAlg!";
 
 }

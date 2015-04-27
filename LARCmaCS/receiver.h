@@ -7,7 +7,6 @@
 #include "packetSSL.h"
 #include "robocup_ssl_client.h"
 #include <iostream>
-#include <QDebug>
 
 
 using namespace std;
@@ -20,10 +19,6 @@ struct ReceiverWorker : public QObject
     Q_OBJECT
 public:
     explicit ReceiverWorker() {mainalgisfree=true;timer_m=clock(); Time_count=0;}
-private:
-    bool mainalgisfree;
-    clock_t timer_m;
-    int Time_count;
 public slots:
     void MainAlgFree(){mainalgisfree=true;}
     void start()
@@ -36,17 +31,18 @@ public slots:
 
     void stop() { shutdownread = true; }
 
-    void mainAlgFree() { qDebug()<<"free!";mainalgisfree = true; }
+    void mainAlgFree() {mainalgisfree = true; }
 
 signals:
     void activateGUI(PacketSSL packetssl);
     void activateMA(PacketSSL packetssl);
     void UpdateSSLFPS(QString message);
-    void activateGUI(PacketSSL packetssl);
 
 private:
+    clock_t timer_m;
+    int Time_count;
+private:
     void run();
-
     RoboCupSSLClient client;
     SSL_WrapperPacket packet;
     bool shutdownread;

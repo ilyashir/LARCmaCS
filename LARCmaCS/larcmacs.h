@@ -59,13 +59,9 @@ private slots:
 
 private slots:
     void PickWifiRobot(QString addr);
-
     void on_pushButton_Pause_clicked();
-
-    void on_pushButton_2_clicked();
-
-
     void on_PickRobot_pushButton_clicked();
+    void on_pushButton_SetMLdir_clicked();
 
 signals:
 
