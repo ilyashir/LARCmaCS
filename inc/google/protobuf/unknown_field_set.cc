@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -45,7 +45,7 @@ namespace google {
 namespace protobuf {
 
 UnknownFieldSet::UnknownFieldSet()
-    : fields_(NULL) {}
+  : fields_(NULL) {}
 
 UnknownFieldSet::~UnknownFieldSet() {
   Clear();
@@ -104,7 +104,7 @@ void UnknownFieldSet::AddVarint(int number, uint64 value) {
   if (fields_ == NULL) fields_ = new vector<UnknownField>;
   UnknownField field;
   field.number_ = number;
-  field.SetType(UnknownField::TYPE_VARINT);
+  field.type_ = UnknownField::TYPE_VARINT;
   field.varint_ = value;
   fields_->push_back(field);
 }
@@ -113,7 +113,7 @@ void UnknownFieldSet::AddFixed32(int number, uint32 value) {
   if (fields_ == NULL) fields_ = new vector<UnknownField>;
   UnknownField field;
   field.number_ = number;
-  field.SetType(UnknownField::TYPE_FIXED32);
+  field.type_ = UnknownField::TYPE_FIXED32;
   field.fixed32_ = value;
   fields_->push_back(field);
 }
@@ -122,7 +122,7 @@ void UnknownFieldSet::AddFixed64(int number, uint64 value) {
   if (fields_ == NULL) fields_ = new vector<UnknownField>;
   UnknownField field;
   field.number_ = number;
-  field.SetType(UnknownField::TYPE_FIXED64);
+  field.type_ = UnknownField::TYPE_FIXED64;
   field.fixed64_ = value;
   fields_->push_back(field);
 }
@@ -131,7 +131,7 @@ string* UnknownFieldSet::AddLengthDelimited(int number) {
   if (fields_ == NULL) fields_ = new vector<UnknownField>;
   UnknownField field;
   field.number_ = number;
-  field.SetType(UnknownField::TYPE_LENGTH_DELIMITED);
+  field.type_ = UnknownField::TYPE_LENGTH_DELIMITED;
   field.length_delimited_.string_value_ = new string;
   fields_->push_back(field);
   return field.length_delimited_.string_value_;
@@ -142,7 +142,7 @@ UnknownFieldSet* UnknownFieldSet::AddGroup(int number) {
   if (fields_ == NULL) fields_ = new vector<UnknownField>;
   UnknownField field;
   field.number_ = number;
-  field.SetType(UnknownField::TYPE_GROUP);
+  field.type_ = UnknownField::TYPE_GROUP;
   field.group_ = new UnknownFieldSet;
   fields_->push_back(field);
   return field.group_;
@@ -188,9 +188,10 @@ void UnknownFieldSet::DeleteByNumber(int number) {
 }
 
 bool UnknownFieldSet::MergeFromCodedStream(io::CodedInputStream* input) {
+
   UnknownFieldSet other;
   if (internal::WireFormat::SkipMessage(input, &other) &&
-      input->ConsumedEntireMessage()) {
+                                  input->ConsumedEntireMessage()) {
     MergeFrom(other);
     return true;
   } else {
@@ -205,8 +206,8 @@ bool UnknownFieldSet::ParseFromCodedStream(io::CodedInputStream* input) {
 
 bool UnknownFieldSet::ParseFromZeroCopyStream(io::ZeroCopyInputStream* input) {
   io::CodedInputStream coded_input(input);
-  return (ParseFromCodedStream(&coded_input) &&
-          coded_input.ConsumedEntireMessage());
+  return ParseFromCodedStream(&coded_input) &&
+    coded_input.ConsumedEntireMessage();
 }
 
 bool UnknownFieldSet::ParseFromArray(const void* data, int size) {
@@ -247,14 +248,14 @@ void UnknownField::DeepCopy() {
 
 void UnknownField::SerializeLengthDelimitedNoTag(
     io::CodedOutputStream* output) const {
-  GOOGLE_DCHECK_EQ(TYPE_LENGTH_DELIMITED, type());
+  GOOGLE_DCHECK_EQ(TYPE_LENGTH_DELIMITED, type_);
   const string& data = *length_delimited_.string_value_;
   output->WriteVarint32(data.size());
-  output->WriteRawMaybeAliased(data.data(), data.size());
+  output->WriteString(data);
 }
 
 uint8* UnknownField::SerializeLengthDelimitedNoTagToArray(uint8* target) const {
-  GOOGLE_DCHECK_EQ(TYPE_LENGTH_DELIMITED, type());
+  GOOGLE_DCHECK_EQ(TYPE_LENGTH_DELIMITED, type_);
   const string& data = *length_delimited_.string_value_;
   target = io::CodedOutputStream::WriteVarint32ToArray(data.size(), target);
   target = io::CodedOutputStream::WriteStringToArray(data, target);

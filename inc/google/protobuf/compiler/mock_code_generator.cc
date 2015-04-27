@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,8 +32,6 @@
 
 #include <google/protobuf/compiler/mock_code_generator.h>
 
-#include <memory>
-
 #include <google/protobuf/testing/file.h>
 #include <google/protobuf/descriptor.pb.h>
 #include <google/protobuf/descriptor.h>
@@ -55,7 +53,7 @@ string CommaSeparatedList(const vector<const FileDescriptor*> all_files) {
   for (int i = 0; i < all_files.size(); i++) {
     names.push_back(all_files[i]->name());
   }
-  return Join(names, ",");
+  return JoinStrings(names, ",");
 }
 
 static const char* kFirstInsertionPointName = "first_mock_insertion_point";
@@ -79,11 +77,11 @@ void MockCodeGenerator::ExpectGenerated(
     const string& first_parsed_file_name,
     const string& output_directory) {
   string content;
-  GOOGLE_CHECK_OK(
-      File::GetContents(output_directory + "/" + GetOutputFileName(name, file),
-                        &content, true));
+  ASSERT_TRUE(File::ReadFileToString(
+      output_directory + "/" + GetOutputFileName(name, file), &content));
 
-  vector<string> lines = Split(content, "\n", true);
+  vector<string> lines;
+  SplitStringUsing(content, "\n", &lines);
 
   while (!lines.empty() && lines.back().empty()) {
     lines.pop_back();
@@ -97,7 +95,7 @@ void MockCodeGenerator::ExpectGenerated(
     SplitStringUsing(insertions, ",", &insertion_list);
   }
 
-  EXPECT_EQ(lines.size(), 3 + insertion_list.size() * 2);
+  ASSERT_EQ(lines.size(), 3 + insertion_list.size() * 2);
   EXPECT_EQ(GetOutputFileContent(name, parameter, file,
                                  first_parsed_file_name, first_message_name),
             lines[0]);
@@ -157,8 +155,10 @@ bool MockCodeGenerator::Generate(
 
     for (int i = 0; i < insert_into.size(); i++) {
       {
-        scoped_ptr<io::ZeroCopyOutputStream> output(context->OpenForInsert(
-            GetOutputFileName(insert_into[i], file), kFirstInsertionPointName));
+        scoped_ptr<io::ZeroCopyOutputStream> output(
+            context->OpenForInsert(
+              GetOutputFileName(insert_into[i], file),
+              kFirstInsertionPointName));
         io::Printer printer(output.get(), '$');
         printer.PrintRaw(GetOutputFileContent(name_, "first_insert",
                                               file, context));
@@ -170,8 +170,9 @@ bool MockCodeGenerator::Generate(
 
       {
         scoped_ptr<io::ZeroCopyOutputStream> output(
-            context->OpenForInsert(GetOutputFileName(insert_into[i], file),
-                                   kSecondInsertionPointName));
+            context->OpenForInsert(
+              GetOutputFileName(insert_into[i], file),
+              kSecondInsertionPointName));
         io::Printer printer(output.get(), '$');
         printer.PrintRaw(GetOutputFileContent(name_, "second_insert",
                                               file, context));

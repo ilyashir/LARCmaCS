@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -80,24 +80,6 @@ bool File::ReadFileToString(const string& name, string* output) {
 
 void File::ReadFileToStringOrDie(const string& name, string* output) {
   GOOGLE_CHECK(ReadFileToString(name, output)) << "Could not read: " << name;
-}
-
-bool File::WriteStringToFile(const string& contents, const string& name) {
-  FILE* file = fopen(name.c_str(), "wb");
-  if (file == NULL) {
-    GOOGLE_LOG(ERROR) << "fopen(" << name << ", \"wb\"): " << strerror(errno);
-    return false;
-  }
-
-  if (fwrite(contents.data(), 1, contents.size(), file) != contents.size()) {
-    GOOGLE_LOG(ERROR) << "fwrite(" << name << "): " << strerror(errno);
-    return false;
-  }
-
-  if (fclose(file) != 0) {
-    return false;
-  }
-  return true;
 }
 
 void File::WriteStringToFileOrDie(const string& contents, const string& name) {

@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,9 +33,6 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <google/protobuf/compiler/cpp/cpp_file.h>
-#include <memory>
-#include <set>
-
 #include <google/protobuf/compiler/cpp/cpp_enum.h>
 #include <google/protobuf/compiler/cpp/cpp_service.h>
 #include <google/protobuf/compiler/cpp/cpp_extension.h>
@@ -53,17 +50,18 @@ namespace cpp {
 
 // ===================================================================
 
-FileGenerator::FileGenerator(const FileDescriptor* file, const Options& options)
-    : file_(file),
-      message_generators_(
-          new scoped_ptr<MessageGenerator>[file->message_type_count()]),
-      enum_generators_(
-          new scoped_ptr<EnumGenerator>[file->enum_type_count()]),
-      service_generators_(
-          new scoped_ptr<ServiceGenerator>[file->service_count()]),
-      extension_generators_(
-          new scoped_ptr<ExtensionGenerator>[file->extension_count()]),
-      options_(options) {
+FileGenerator::FileGenerator(const FileDescriptor* file,
+                             const Options& options)
+  : file_(file),
+    message_generators_(
+      new scoped_ptr<MessageGenerator>[file->message_type_count()]),
+    enum_generators_(
+      new scoped_ptr<EnumGenerator>[file->enum_type_count()]),
+    service_generators_(
+      new scoped_ptr<ServiceGenerator>[file->service_count()]),
+    extension_generators_(
+      new scoped_ptr<ExtensionGenerator>[file->extension_count()]),
+    options_(options) {
 
   for (int i = 0; i < file->message_type_count(); i++) {
     message_generators_[i].reset(
@@ -155,27 +153,18 @@ void FileGenerator::GenerateHeader(io::Printer* printer) {
       "#include <google/protobuf/service.h>\n");
   }
 
-  if (UseUnknownFieldSet(file_) && file_->message_type_count() > 0) {
+  if (HasUnknownFields(file_) && file_->message_type_count() > 0) {
     printer->Print(
       "#include <google/protobuf/unknown_field_set.h>\n");
   }
 
 
-  set<string> public_import_names;
-  for (int i = 0; i < file_->public_dependency_count(); i++) {
-    public_import_names.insert(file_->public_dependency(i)->name());
-  }
-
   for (int i = 0; i < file_->dependency_count(); i++) {
-    const string& name = file_->dependency(i)->name();
-    bool public_import = (public_import_names.count(name) != 0);
-
-
     printer->Print(
-      "#include \"$dependency$.pb.h\"$iwyu$\n",
-      "dependency", StripProto(name),
-      "iwyu", (public_import) ? "  // IWYU pragma: export" : "");
+      "#include \"$dependency$.pb.h\"\n",
+      "dependency", StripProto(file_->dependency(i)->name()));
   }
+
 
   printer->Print(
     "// @@protoc_insertion_point(includes)\n");
@@ -259,7 +248,6 @@ void FileGenerator::GenerateHeader(io::Printer* printer) {
   printer->Print(kThickSeparator);
   printer->Print("\n");
 
-
   // Generate class inline methods.
   for (int i = 0; i < file_->message_type_count(); i++) {
     if (i > 0) {
@@ -328,12 +316,6 @@ void FileGenerator::GenerateSource(io::Printer* printer) {
     "#include <google/protobuf/wire_format_lite_inl.h>\n",
     "filename", file_->name(),
     "basename", StripProto(file_->name()));
-
-  // Unknown fields implementation in lite mode uses StringOutputStream
-  if (!UseUnknownFieldSet(file_) && file_->message_type_count() > 0) {
-    printer->Print(
-      "#include <google/protobuf/io/zero_copy_stream_impl_lite.h>\n");
-  }
 
   if (HasDescriptorMethods(file_)) {
     printer->Print(
@@ -560,12 +542,17 @@ void FileGenerator::GenerateBuildDescriptors(io::Printer* printer) {
   for (int i = 0; i < file_->dependency_count(); i++) {
     const FileDescriptor* dependency = file_->dependency(i);
     // Print the namespace prefix for the dependency.
-    string add_desc_name = QualifiedFileLevelSymbol(
-        dependency->package(), GlobalAddDescriptorsName(dependency->name()));
+    vector<string> dependency_package_parts;
+    SplitStringUsing(dependency->package(), ".", &dependency_package_parts);
+    printer->Print("::");
+    for (int j = 0; j < dependency_package_parts.size(); j++) {
+      printer->Print("$name$::",
+                     "name", dependency_package_parts[j]);
+    }
     // Call its AddDescriptors function.
     printer->Print(
       "$name$();\n",
-      "name", add_desc_name);
+      "name", GlobalAddDescriptorsName(dependency->name()));
   }
 
   if (HasDescriptorMethods(file_)) {
@@ -633,7 +620,7 @@ void FileGenerator::GenerateBuildDescriptors(io::Printer* printer) {
     // Without.
     "GOOGLE_PROTOBUF_DECLARE_ONCE($adddescriptorsname$_once_);\n"
     "void $adddescriptorsname$() {\n"
-    "  ::google::protobuf::GoogleOnceInit(&$adddescriptorsname$_once_,\n"
+    "  ::google::protobuf::::google::protobuf::GoogleOnceInit(&$adddescriptorsname$_once_,\n"
     "                 &$adddescriptorsname$_impl);\n"
     "}\n",
     // Vars.

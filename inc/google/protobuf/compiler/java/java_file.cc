@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,18 +33,11 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <google/protobuf/compiler/java/java_file.h>
-
-#include <memory>
-
-#include <google/protobuf/compiler/java/java_context.h>
 #include <google/protobuf/compiler/java/java_enum.h>
+#include <google/protobuf/compiler/java/java_service.h>
 #include <google/protobuf/compiler/java/java_extension.h>
-#include <google/protobuf/compiler/java/java_generator_factory.h>
 #include <google/protobuf/compiler/java/java_helpers.h>
 #include <google/protobuf/compiler/java/java_message.h>
-#include <google/protobuf/compiler/java/java_name_resolver.h>
-#include <google/protobuf/compiler/java/java_service.h>
-#include <google/protobuf/compiler/java/java_shared_code_generator.h>
 #include <google/protobuf/compiler/code_generator.h>
 #include <google/protobuf/io/printer.h>
 #include <google/protobuf/io/zero_copy_stream.h>
@@ -139,27 +132,10 @@ void CollectExtensions(const FileDescriptorProto& file_proto,
 
 }  // namespace
 
-FileGenerator::FileGenerator(const FileDescriptor* file, bool immutable_api)
-    : file_(file),
-      java_package_(FileJavaPackage(file, immutable_api)),
-      message_generators_(
-          new scoped_ptr<MessageGenerator>[file->message_type_count()]),
-      extension_generators_(
-          new scoped_ptr<ExtensionGenerator>[file->extension_count()]),
-      context_(new Context(file)),
-      name_resolver_(context_->GetNameResolver()),
-      immutable_api_(immutable_api) {
-  classname_ = name_resolver_->GetFileClassName(file, immutable_api);
-  generator_factory_.reset(
-      new ImmutableGeneratorFactory(context_.get()));
-  for (int i = 0; i < file_->message_type_count(); ++i) {
-    message_generators_[i].reset(
-        generator_factory_->NewMessageGenerator(file_->message_type(i)));
-  }
-  for (int i = 0; i < file_->extension_count(); ++i) {
-    extension_generators_[i].reset(
-        generator_factory_->NewExtensionGenerator(file_->extension(i)));
-  }
+FileGenerator::FileGenerator(const FileDescriptor* file)
+  : file_(file),
+    java_package_(FileJavaPackage(file)),
+    classname_(FileClassName(file)) {
 }
 
 FileGenerator::~FileGenerator() {}
@@ -169,7 +145,25 @@ bool FileGenerator::Validate(string* error) {
   // problem that leads to Java compile errors that can be hard to understand.
   // It's especially bad when using the java_multiple_files, since we would
   // end up overwriting the outer class with one of the inner ones.
-  if (name_resolver_->HasConflictingClassName(file_, classname_)) {
+
+  bool found_conflict = false;
+  for (int i = 0; i < file_->enum_type_count() && !found_conflict; i++) {
+    if (file_->enum_type(i)->name() == classname_) {
+      found_conflict = true;
+    }
+  }
+  for (int i = 0; i < file_->message_type_count() && !found_conflict; i++) {
+    if (file_->message_type(i)->name() == classname_) {
+      found_conflict = true;
+    }
+  }
+  for (int i = 0; i < file_->service_count() && !found_conflict; i++) {
+    if (file_->service(i)->name() == classname_) {
+      found_conflict = true;
+    }
+  }
+
+  if (found_conflict) {
     error->assign(file_->name());
     error->append(
       ": Cannot generate Java output because the file's outer class name, \"");
@@ -180,29 +174,7 @@ bool FileGenerator::Validate(string* error) {
       "option to specify a different outer class name for the .proto file.");
     return false;
   }
-  // If java_outer_classname option is not set and the default outer class name
-  // conflicts with a type defined in the message, we will append a suffix to
-  // avoid the conflict. This allows proto1 API protos to be dual-compiled into
-  // proto2 API without code change. When this happens we'd like to issue an
-  // warning to let the user know that the outer class name has been changed.
-  // Although we only do this automatic naming fix for immutable API, mutable
-  // outer class name will also be affected as it's contructed from immutable
-  // outer class name with an additional "Mutable" prefix. Since the naming
-  // change in mutable API is not caused by a naming conflict, we generate the
-  // warning for immutable API only.
-  if (immutable_api_ && !file_->options().has_java_outer_classname()) {
-    string default_classname =
-        name_resolver_->GetFileDefaultImmutableClassName(file_);
-    if (default_classname != classname_) {
-      GOOGLE_LOG(WARNING) << file_->name() << ": The default outer class name, \""
-                   << default_classname << "\", conflicts with a type "
-                   << "declared in the proto file and an alternative outer "
-                   << "class name is used: \"" << classname_ << "\". To avoid "
-                   << "this warning, please use the java_outer_classname "
-                   << "option to specify a different outer class name for "
-                   << "the .proto file.";
-    }
-  }
+
   return true;
 }
 
@@ -236,11 +208,12 @@ void FileGenerator::Generate(io::Printer* printer) {
   printer->Indent();
 
   for (int i = 0; i < file_->extension_count(); i++) {
-    extension_generators_[i]->GenerateRegistrationCode(printer);
+    ExtensionGenerator(file_->extension(i)).GenerateRegistrationCode(printer);
   }
 
   for (int i = 0; i < file_->message_type_count(); i++) {
-    message_generators_[i]->GenerateExtensionRegistrationCode(printer);
+    MessageGenerator(file_->message_type(i))
+      .GenerateExtensionRegistrationCode(printer);
   }
 
   printer->Outdent();
@@ -249,20 +222,18 @@ void FileGenerator::Generate(io::Printer* printer) {
 
   // -----------------------------------------------------------------
 
-  if (!MultipleJavaFiles(file_, immutable_api_)) {
+  if (!file_->options().java_multiple_files()) {
     for (int i = 0; i < file_->enum_type_count(); i++) {
-      EnumGenerator(file_->enum_type(i), immutable_api_, context_.get())
-          .Generate(printer);
+      EnumGenerator(file_->enum_type(i)).Generate(printer);
     }
     for (int i = 0; i < file_->message_type_count(); i++) {
-      message_generators_[i]->GenerateInterface(printer);
-      message_generators_[i]->Generate(printer);
+      MessageGenerator messageGenerator(file_->message_type(i));
+      messageGenerator.GenerateInterface(printer);
+      messageGenerator.Generate(printer);
     }
     if (HasGenericServices(file_)) {
       for (int i = 0; i < file_->service_count(); i++) {
-        scoped_ptr<ServiceGenerator> generator(
-            generator_factory_->NewServiceGenerator(file_->service(i)));
-        generator->Generate(printer);
+        ServiceGenerator(file_->service(i)).Generate(printer);
       }
     }
   }
@@ -270,29 +241,28 @@ void FileGenerator::Generate(io::Printer* printer) {
   // Extensions must be generated in the outer class since they are values,
   // not classes.
   for (int i = 0; i < file_->extension_count(); i++) {
-    extension_generators_[i]->Generate(printer);
+    ExtensionGenerator(file_->extension(i)).Generate(printer);
   }
 
   // Static variables.
   for (int i = 0; i < file_->message_type_count(); i++) {
-    message_generators_[i]->GenerateStaticVariables(printer);
+    // TODO(kenton):  Reuse MessageGenerator objects?
+    MessageGenerator(file_->message_type(i)).GenerateStaticVariables(printer);
   }
 
   printer->Print("\n");
 
   if (HasDescriptorMethods(file_)) {
-    if (immutable_api_) {
-      GenerateDescriptorInitializationCodeForImmutable(printer);
-    } else {
-      GenerateDescriptorInitializationCodeForMutable(printer);
-    }
+    GenerateEmbeddedDescriptor(printer);
   } else {
     printer->Print(
       "static {\n");
     printer->Indent();
 
     for (int i = 0; i < file_->message_type_count(); i++) {
-      message_generators_[i]->GenerateStaticVariableInitializers(printer);
+      // TODO(kenton):  Reuse MessageGenerator objects?
+      MessageGenerator(file_->message_type(i))
+        .GenerateStaticVariableInitializers(printer);
     }
 
     printer->Outdent();
@@ -308,8 +278,23 @@ void FileGenerator::Generate(io::Printer* printer) {
   printer->Print("}\n");
 }
 
-void FileGenerator::GenerateDescriptorInitializationCodeForImmutable(
-    io::Printer* printer) {
+void FileGenerator::GenerateEmbeddedDescriptor(io::Printer* printer) {
+  // Embed the descriptor.  We simply serialize the entire FileDescriptorProto
+  // and embed it as a string literal, which is parsed and built into real
+  // descriptors at initialization time.  We unfortunately have to put it in
+  // a string literal, not a byte array, because apparently using a literal
+  // byte array causes the Java compiler to generate *instructions* to
+  // initialize each and every byte of the array, e.g. as if you typed:
+  //   b[0] = 123; b[1] = 456; b[2] = 789;
+  // This makes huge bytecode files and can easily hit the compiler's internal
+  // code size limits (error "code to large").  String literals are apparently
+  // embedded raw, which is what we want.
+  FileDescriptorProto file_proto;
+  file_->CopyTo(&file_proto);
+
+  string file_data;
+  file_proto.SerializeToString(&file_data);
+
   printer->Print(
     "public static com.google.protobuf.Descriptors.FileDescriptor\n"
     "    getDescriptor() {\n"
@@ -317,17 +302,55 @@ void FileGenerator::GenerateDescriptorInitializationCodeForImmutable(
     "}\n"
     "private static com.google.protobuf.Descriptors.FileDescriptor\n"
     "    descriptor;\n"
-    "static {\n");
+    "static {\n"
+    "  java.lang.String[] descriptorData = {\n");
+  printer->Indent();
   printer->Indent();
 
-  SharedCodeGenerator shared_code_generator(file_);
-  shared_code_generator.GenerateDescriptors(printer);
+  // Only write 40 bytes per line.
+  static const int kBytesPerLine = 40;
+  for (int i = 0; i < file_data.size(); i += kBytesPerLine) {
+    if (i > 0) {
+      // Every 400 lines, start a new string literal, in order to avoid the
+      // 64k length limit.
+      if (i % 400 == 0) {
+        printer->Print(",\n");
+      } else {
+        printer->Print(" +\n");
+      }
+    }
+    printer->Print("\"$data$\"",
+      "data", CEscape(file_data.substr(i, kBytesPerLine)));
+  }
+
+  printer->Outdent();
+  printer->Print("\n};\n");
+
+  // -----------------------------------------------------------------
+  // Create the InternalDescriptorAssigner.
+
+  printer->Print(
+    "com.google.protobuf.Descriptors.FileDescriptor."
+      "InternalDescriptorAssigner assigner =\n"
+    "  new com.google.protobuf.Descriptors.FileDescriptor."
+      "InternalDescriptorAssigner() {\n"
+    "    public com.google.protobuf.ExtensionRegistry assignDescriptors(\n"
+    "        com.google.protobuf.Descriptors.FileDescriptor root) {\n"
+    "      descriptor = root;\n");
+
+  printer->Indent();
+  printer->Indent();
+  printer->Indent();
 
   for (int i = 0; i < file_->message_type_count(); i++) {
-    message_generators_[i]->GenerateStaticVariableInitializers(printer);
+    // TODO(kenton):  Reuse MessageGenerator objects?
+    MessageGenerator(file_->message_type(i))
+      .GenerateStaticVariableInitializers(printer);
   }
   for (int i = 0; i < file_->extension_count(); i++) {
-    extension_generators_[i]->GenerateNonNestedInitializationCode(printer);
+    // TODO(kenton):  Reuse ExtensionGenerator objects?
+    ExtensionGenerator(file_->extension(i))
+        .GenerateNonNestedInitializationCode(printer);
   }
 
   // Proto compiler builds a DescriptorPool, which holds all the descriptors to
@@ -345,106 +368,51 @@ void FileGenerator::GenerateDescriptorInitializationCodeForImmutable(
   // To find those extensions, we need to parse the data into a dynamic message
   // of the FileDescriptor based on the builder-pool, then we can use
   // reflections to find all extension fields
-  FileDescriptorProto file_proto;
-  file_->CopyTo(&file_proto);
-  string file_data;
-  file_proto.SerializeToString(&file_data);
   vector<const FieldDescriptor*> extensions;
   CollectExtensions(file_proto, *file_->pool(), &extensions, file_data);
 
   if (extensions.size() > 0) {
     // Must construct an ExtensionRegistry containing all existing extensions
-    // and use it to parse the descriptor data again to recognize extensions.
+    // and return it.
     printer->Print(
       "com.google.protobuf.ExtensionRegistry registry =\n"
-      "    com.google.protobuf.ExtensionRegistry.newInstance();\n");
+      "  com.google.protobuf.ExtensionRegistry.newInstance();\n");
     for (int i = 0; i < extensions.size(); i++) {
-      scoped_ptr<ExtensionGenerator> generator(
-          generator_factory_->NewExtensionGenerator(extensions[i]));
-      generator->GenerateRegistrationCode(printer);
+      ExtensionGenerator(extensions[i]).GenerateRegistrationCode(printer);
     }
     printer->Print(
-      "com.google.protobuf.Descriptors.FileDescriptor\n"
-      "    .internalUpdateFileDescriptor(descriptor, registry);\n");
-  }
-
-  // Force descriptor initialization of all dependencies.
-  for (int i = 0; i < file_->dependency_count(); i++) {
-    if (ShouldIncludeDependency(file_->dependency(i), true)) {
-      string dependency =
-          name_resolver_->GetImmutableClassName(file_->dependency(i));
-      printer->Print(
-        "$dependency$.getDescriptor();\n",
-        "dependency", dependency);
-    }
+      "return registry;\n");
+  } else {
+    printer->Print(
+      "return null;\n");
   }
 
   printer->Outdent();
-  printer->Print(
-    "}\n");
-}
-
-void FileGenerator::GenerateDescriptorInitializationCodeForMutable(io::Printer* printer) {
-  printer->Print(
-    "public static com.google.protobuf.Descriptors.FileDescriptor\n"
-    "    getDescriptor() {\n"
-    "  return descriptor;\n"
-    "}\n"
-    "private static com.google.protobuf.Descriptors.FileDescriptor\n"
-    "    descriptor;\n"
-    "static {\n");
-  printer->Indent();
+  printer->Outdent();
+  printer->Outdent();
 
   printer->Print(
-    "descriptor = $immutable_package$.$descriptor_classname$.descriptor;\n",
-    "immutable_package", FileJavaPackage(file_, true),
-    "descriptor_classname", name_resolver_->GetDescriptorClassName(file_));
+    "    }\n"
+    "  };\n");
 
-  for (int i = 0; i < file_->message_type_count(); i++) {
-    message_generators_[i]->GenerateStaticVariableInitializers(printer);
-  }
-  for (int i = 0; i < file_->extension_count(); i++) {
-    extension_generators_[i]->GenerateNonNestedInitializationCode(printer);
-  }
+  // -----------------------------------------------------------------
+  // Invoke internalBuildGeneratedFileFrom() to build the file.
 
-  // Check if custom options exist. If any, try to load immutable classes since
-  // custom options are only represented with immutable messages.
-  FileDescriptorProto file_proto;
-  file_->CopyTo(&file_proto);
-  string file_data;
-  file_proto.SerializeToString(&file_data);
-  vector<const FieldDescriptor*> extensions;
-  CollectExtensions(file_proto, *file_->pool(), &extensions, file_data);
+  printer->Print(
+    "com.google.protobuf.Descriptors.FileDescriptor\n"
+    "  .internalBuildGeneratedFileFrom(descriptorData,\n"
+    "    new com.google.protobuf.Descriptors.FileDescriptor[] {\n");
 
-  if (extensions.size() > 0) {
-    // Try to load immutable messages' outer class. Its initialization code
-    // will take care of interpreting custom options.
-    printer->Print(
-      "try {\n"
-      // Note that we have to load the immutable class dynamically here as
-      // we want the mutable code to be independent from the immutable code
-      // at compile time. It is required to implement dual-compile for
-      // mutable and immutable API in blaze.
-      "  java.lang.Class immutableClass = java.lang.Class.forName(\n"
-      "      \"$immutable_classname$\");\n"
-      "} catch (java.lang.ClassNotFoundException e) {\n"
-      // The immutable class can not be found. Custom options are left
-      // as unknown fields.
-      // TODO(xiaofeng): inform the user with a warning?
-      "}\n",
-      "immutable_classname", name_resolver_->GetImmutableClassName(file_));
-  }
-
-  // Force descriptor initialization of all dependencies.
   for (int i = 0; i < file_->dependency_count(); i++) {
-    if (ShouldIncludeDependency(file_->dependency(i), false)) {
-      string dependency = name_resolver_->GetMutableClassName(
-          file_->dependency(i));
+    if (ShouldIncludeDependency(file_->dependency(i))) {
       printer->Print(
-        "$dependency$.getDescriptor();\n",
-        "dependency", dependency);
+        "      $dependency$.getDescriptor(),\n",
+        "dependency", ClassName(file_->dependency(i)));
     }
   }
+
+  printer->Print(
+    "    }, assigner);\n");
 
   printer->Outdent();
   printer->Print(
@@ -458,7 +426,6 @@ static void GenerateSibling(const string& package_dir,
                             GeneratorContext* context,
                             vector<string>* file_list,
                             const string& name_suffix,
-                            GeneratorClass* generator,
                             void (GeneratorClass::*pfn)(io::Printer* printer)) {
   string filename = package_dir + descriptor->name() + name_suffix + ".java";
   file_list->push_back(filename);
@@ -478,53 +445,42 @@ static void GenerateSibling(const string& package_dir,
       "package", java_package);
   }
 
-  (generator->*pfn)(&printer);
+  GeneratorClass generator(descriptor);
+  (generator.*pfn)(&printer);
 }
 
 void FileGenerator::GenerateSiblings(const string& package_dir,
                                      GeneratorContext* context,
                                      vector<string>* file_list) {
-  if (MultipleJavaFiles(file_, immutable_api_)) {
+  if (file_->options().java_multiple_files()) {
     for (int i = 0; i < file_->enum_type_count(); i++) {
-      EnumGenerator generator(file_->enum_type(i), immutable_api_,
-                              context_.get());
       GenerateSibling<EnumGenerator>(package_dir, java_package_,
                                      file_->enum_type(i),
                                      context, file_list, "",
-                                     &generator,
                                      &EnumGenerator::Generate);
     }
     for (int i = 0; i < file_->message_type_count(); i++) {
-      if (immutable_api_) {
-        GenerateSibling<MessageGenerator>(package_dir, java_package_,
-                                          file_->message_type(i),
-                                          context, file_list,
-                                          "OrBuilder",
-                                          message_generators_[i].get(),
-                                          &MessageGenerator::GenerateInterface);
-      }
+      GenerateSibling<MessageGenerator>(package_dir, java_package_,
+                                        file_->message_type(i),
+                                        context, file_list, "OrBuilder",
+                                        &MessageGenerator::GenerateInterface);
       GenerateSibling<MessageGenerator>(package_dir, java_package_,
                                         file_->message_type(i),
                                         context, file_list, "",
-                                        message_generators_[i].get(),
                                         &MessageGenerator::Generate);
     }
     if (HasGenericServices(file_)) {
       for (int i = 0; i < file_->service_count(); i++) {
-        scoped_ptr<ServiceGenerator> generator(
-            generator_factory_->NewServiceGenerator(file_->service(i)));
         GenerateSibling<ServiceGenerator>(package_dir, java_package_,
                                           file_->service(i),
                                           context, file_list, "",
-                                          generator.get(),
                                           &ServiceGenerator::Generate);
       }
     }
   }
 }
 
-bool FileGenerator::ShouldIncludeDependency(
-    const FileDescriptor* descriptor, bool immutable_api) {
+bool FileGenerator::ShouldIncludeDependency(const FileDescriptor* descriptor) {
   return true;
 }
 

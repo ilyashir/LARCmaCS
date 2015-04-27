@@ -1,6 +1,6 @@
 // Protocol Buffers - Google's data interchange format
 // Copyright 2008 Google Inc.  All rights reserved.
-// https://developers.google.com/protocol-buffers/
+// http://code.google.com/p/protobuf/
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -33,8 +33,6 @@
 //  Sanjay Ghemawat, Jeff Dean, and others.
 
 #include <google/protobuf/compiler/cpp/cpp_field.h>
-#include <memory>
-
 #include <google/protobuf/compiler/cpp/cpp_helpers.h>
 #include <google/protobuf/compiler/cpp/cpp_primitive_field.h>
 #include <google/protobuf/compiler/cpp/cpp_string_field.h>
@@ -70,12 +68,6 @@ void SetCommonFieldVariables(const FieldDescriptor* descriptor,
   (*variables)["cppget"] = "Get";
 }
 
-void SetCommonOneofFieldVariables(const FieldDescriptor* descriptor,
-                                  map<string, string>* variables) {
-  (*variables)["oneof_prefix"] = descriptor->containing_oneof()->name() + "_.";
-  (*variables)["oneof_name"] = descriptor->containing_oneof()->name();
-}
-
 FieldGenerator::~FieldGenerator() {}
 
 void FieldGenerator::
@@ -92,9 +84,8 @@ GenerateMergeFromCodedStreamWithPacking(io::Printer* printer) const {
 
 FieldGeneratorMap::FieldGeneratorMap(const Descriptor* descriptor,
                                      const Options& options)
-    : descriptor_(descriptor),
-      field_generators_(
-          new scoped_ptr<FieldGenerator>[descriptor->field_count()]) {
+  : descriptor_(descriptor),
+    field_generators_(new scoped_ptr<FieldGenerator>[descriptor->field_count()]) {
   // Construct all the FieldGenerators.
   for (int i = 0; i < descriptor->field_count(); i++) {
     field_generators_[i].reset(MakeGenerator(descriptor->field(i), options));
@@ -117,21 +108,6 @@ FieldGenerator* FieldGeneratorMap::MakeGenerator(const FieldDescriptor* field,
         return new RepeatedEnumFieldGenerator(field, options);
       default:
         return new RepeatedPrimitiveFieldGenerator(field, options);
-    }
-  } else if (field->containing_oneof()) {
-    switch (field->cpp_type()) {
-      case FieldDescriptor::CPPTYPE_MESSAGE:
-        return new MessageOneofFieldGenerator(field, options);
-      case FieldDescriptor::CPPTYPE_STRING:
-        switch (field->options().ctype()) {
-          default:  // StringOneofFieldGenerator handles unknown ctypes.
-          case FieldOptions::STRING:
-            return new StringOneofFieldGenerator(field, options);
-        }
-      case FieldDescriptor::CPPTYPE_ENUM:
-        return new EnumOneofFieldGenerator(field, options);
-      default:
-        return new PrimitiveOneofFieldGenerator(field, options);
     }
   } else {
     switch (field->cpp_type()) {
