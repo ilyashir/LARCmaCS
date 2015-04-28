@@ -105,6 +105,7 @@ void ReceiverWorker::run()
             Time_count=0;
             emit UpdateSSLFPS(ToStatus);
         }
+        QApplication::processEvents();
     }
 
     client.close();

@@ -89,7 +89,7 @@ void ConnectorWorker::startBroadcast()
 }
 
 void ConnectorWorker::run(int N, QByteArray command){
-    qDebug()<<N<<" "<<(int)command[5]<<(int)command[6];
+    //qDebug()<<N<<" "<<(int)command[5]<<(int)command[6];
     udpSocket->writeDatagram(command,QHostAddress(numIP[N]),3001);
 }
 

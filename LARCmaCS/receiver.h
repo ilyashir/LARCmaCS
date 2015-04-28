@@ -60,6 +60,7 @@ public:
     ~Receiver()
     {
         stop();
+        thread.wait(100);
         thread.terminate();
         thread.wait(100);
     }

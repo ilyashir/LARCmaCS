@@ -98,10 +98,6 @@ private:
     bool shutdownview;
 };
 
-
-
-
-
 class BTtransmitter : public QThread
 {
     Q_OBJECT
@@ -110,7 +106,12 @@ public:
     QThread thread;
 public:
     explicit BTtransmitter(){}
-    ~BTtransmitter() { stop(); thread.terminate(); thread.wait(100); }
+    ~BTtransmitter() {
+        stop();
+        thread.wait(100);
+        thread.terminate();
+        thread.wait(100);
+    }
 
     void init()
     {

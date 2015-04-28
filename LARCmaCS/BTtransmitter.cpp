@@ -15,15 +15,16 @@ void BTtransmitterWorker::run()
     //        this,SLOT(error ( QLocalSocket::LocalSocketError)));
     //connect(client,SIGNAL(stateChanged ( QLocalSocket::LocalSocketState )),
     //        this,SLOT(stateChanged ( QLocalSocket::LocalSocketState)));
-    while (1)
+    while (!shutdownview)
     {
         qDebug()<<"<BTtransmitter>: White connect...";
-        while(isconnected==false)
+        while((isconnected==false) && (!shutdownview))
         {
-           Sleep(100);
+           Sleep(50);
            SocketConnect();
+           QApplication::processEvents();
         }
-        while(isconnected)
+        while((isconnected) && (!shutdownview))
         {
             if (!que.empty())
             {
@@ -38,8 +39,8 @@ void BTtransmitterWorker::run()
                 QApplication::processEvents();
             }
         }
+        QApplication::processEvents();
     }
-
 }
 bool BTtransmitterWorker::write(char * message)
 {

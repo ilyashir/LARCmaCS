@@ -24,7 +24,7 @@ public:
         timer_m=clock();
         Time_count=0;
     }
-
+    ~MainAlgWorker() {}
 signals:
     void sendToConnector(int N,QByteArray command);
     void sendToBTtransmitter(char * message);
@@ -67,6 +67,7 @@ public:
     ~MainAlg()
     {
         stop();
+        thread.wait(100);
         thread.terminate();
         thread.wait(100);
     }

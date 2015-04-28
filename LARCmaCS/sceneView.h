@@ -43,7 +43,12 @@ public:
     QThread thread;
 
     explicit sceneView(){}
-    ~sceneView() { stop(); thread.terminate(); thread.wait(100); }
+    ~sceneView() {
+        stop();
+        thread.wait(100);
+        thread.terminate();
+        thread.wait(100);
+    }
 
     void init()
     {
