@@ -43,7 +43,6 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(&mainalg.worker, SIGNAL(sendToConnector(int,QByteArray)), &connector.worker, SLOT(run(int,QByteArray)));
 
     //gui connector
-    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
     connect(&sceneview.worker, SIGNAL(updateView()), this, SLOT(updateView()));
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
 
@@ -56,6 +55,9 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     //SendToBTtransmitter
     connect(&mainalg.worker,SIGNAL(sendToBTtransmitter(char*)),&bttransmitter.worker,SLOT(addmessage(char*)));
 
+    //fieldScene Update
+    connect(&receiver.worker,SIGNAL(activateGUI()),this,SLOT(fieldsceneUpdateRobots()));
+    connect(&sceneview.worker,SIGNAL(updateRobots()),fieldscene,SLOT(update()));
     //    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
     sceneview.start();
     receiver.start();
@@ -64,6 +66,10 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     bttransmitter.start();
     UpdateStatusBar("Waiting SSL connection...");
     UpdateSSLFPS("FPS=0");
+}
+void LARCmaCS::fieldsceneUpdateRobots()
+{
+    fieldscene->UpdateRobots(receiver.worker.detection);
 }
 /*
 void LARCmaCS::initEnded()

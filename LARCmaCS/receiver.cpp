@@ -9,8 +9,6 @@ void ReceiverWorker::run()
 {
     QPointF p;
 
-    SSL_DetectionFrame detection;
-
     int balls_n = 0;
     SSL_DetectionBall ball;
 
@@ -84,7 +82,7 @@ void ReceiverWorker::run()
             {
                 mainalgisfree=false;
                 emit activateMA(packetssl);
-                emit activateGUI(packetssl);
+                emit activateGUI();
             }
         }
         else           

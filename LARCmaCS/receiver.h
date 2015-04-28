@@ -33,8 +33,10 @@ public slots:
 
     void mainAlgFree() {mainalgisfree = true; }
 
+public:
+    SSL_DetectionFrame detection;
 signals:
-    void activateGUI(PacketSSL packetssl);
+    void activateGUI();
     void activateMA(PacketSSL packetssl);
     void UpdateSSLFPS(QString message);
 

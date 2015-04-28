@@ -154,14 +154,14 @@ void FieldScene::UpdateRobots ( SSL_DetectionFrame &detection )
 {
   int robots_blue_n =  detection.robots_blue_size();
   int robots_yellow_n =  detection.robots_yellow_size();
-  cout << robots_blue_n << " " << robots_yellow_n << endl;
+  //cout << robots_blue_n << " " << robots_yellow_n << endl;
   int i,j,yellowj=0,bluej=0;
   int team=teamBlue;
 
   SSL_DetectionRobot robot;
   for ( i = 0; i < robots_blue_n+robots_yellow_n; i++ )
   {
-      cout << "i=" << i << endl;
+    //  cout << "i=" << i << endl;
     if ( i<robots_blue_n )
     {
       robot = detection.robots_blue ( i );
@@ -196,7 +196,7 @@ void FieldScene::UpdateRobots ( SSL_DetectionFrame &detection )
     if ( j+1>robots.size() )
       AddRobot ( new Robot ( x,y,orientation,team,id,detection.camera_id(),conf ) );
 
-    cout << i << " " << id << " " << x << " " << y << " " << orientation << " " << conf << endl;
+    //cout << i << " " << id << " " << x << " " << y << " " << orientation << " " << conf << endl;
 
     robots[j]->SetPose ( x,y,orientation,conf );
     QString label;
@@ -225,6 +225,32 @@ void FieldScene::UpdateRobots ( SSL_DetectionFrame &detection )
   {
     if ( robots[j]->key==detection.camera_id() && robots[j]->teamID==teamYellow )
       robots[j]->conf=0.0;
+  }
+
+  QVector<QGraphicsEllipseItem*> tmp;
+  int cameraID=detection.camera_id();
+  while(cameraID+1>ballItems.size())
+    ballItems.append(tmp);
+  if ( ballItems[cameraID].size() < detection.balls_size() ){
+    //need to allocate some space for the new balls
+    QPen pen ( QColor ( 0xcd,0x59,0x00,0xff ) );
+    pen.setWidth ( 2 );
+    QBrush brush ( QColor ( 0xff,0x81,0x00,0xff ),Qt::SolidPattern );
+    while(detection.balls_size()>ballItems[cameraID].size()){
+      ballItems[cameraID].append ( this->addEllipse ( 0,0,12,12,pen,brush ) );
+      ballItems[cameraID][ballItems[cameraID].size()-1]->setZValue(2);
+    }
+  }
+  else if ( ballItems[cameraID].size() >detection.balls_size() ){
+    //need to delete some balls
+    while(ballItems[cameraID].size()>detection.balls_size()){
+        this->removeItem ( ballItems[cameraID][0] );
+        ballItems[cameraID].remove(0);
+    }
+  }
+  for ( int i=0;i<detection.balls_size();i++ )
+  {
+    ballItems[cameraID][i]->setPos ( detection.balls(i).x()/ksize-6,-detection.balls(i).y()/ksize-6 );
   }
   return;
 }

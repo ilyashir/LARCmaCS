@@ -49,6 +49,7 @@ private:
     QString wifiaddrdata[NUM_CONTROL_ROBOTS];
 
 private slots:
+    void fieldsceneUpdateRobots();
     void UpdateSSLFPS(QString message);
     void UpdateStatusBar(QString message);
     void UpdatePipeStatus(bool status);

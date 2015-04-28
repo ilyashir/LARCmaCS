@@ -23,7 +23,7 @@ public slots:
     }
 
     void stop() { shutdownview = true; }
-    void repaintScene(PacketSSL packetssl);
+    //void repaintScene(PacketSSL packetssl);
 
 signals:
     void updateView();    
