@@ -11,7 +11,7 @@
 #include "BTtransmitter.h"
 #include "BTform.h"
 #include "WiFiForm.h"
-
+#include "remotecontrol.h"
 #define NUM_CONTROL_ROBOTS 12
 
 namespace Ui
@@ -24,7 +24,7 @@ class LARCmaCS : public QWidget
     Q_OBJECT
 
 public:
-
+    RemoteControl remotecontol;
     WifiForm wifiform;
     BTform btform;
     explicit LARCmaCS(QWidget *parent = 0);
@@ -53,7 +53,7 @@ private slots:
     void UpdateSSLFPS(QString message);
     void UpdateStatusBar(QString message);
     void UpdatePipeStatus(bool status);
-    void UpdatePauseState(int status);
+    void UpdatePauseState(QString message);
     void updateView();
     void scaleView(int);
     void on_pushButton_clicked();
@@ -63,12 +63,14 @@ private slots:
     void on_pushButton_Pause_clicked();
     void on_PickRobot_pushButton_clicked();
     void on_pushButton_SetMLdir_clicked();
+    void on_pushButton_RC_clicked();
+    void remcontrolsender(int l, int r,int k, int b);
 
 signals:
-
+    void sendToConnectorRM(int N,QByteArray command);
     void receiveMacArray(QString*);
     void MatlabPause();
-    void MatlabChangeDirrectory(QString dir);
+    void MLEvalString(QString s);
 };
 
 #endif // LARCMACS_H

@@ -153,15 +153,10 @@ void MainAlgWorker::stop_matlab()
 {
     fmtlab = false;
 }
-#include <qdebug.h>
-void MainAlgWorker::ChangeDirrectory(QString dir)
+void MainAlgWorker::EvalString(QString s)
 {
-    char StringWithPath[MAX_PATH];
-    sprintf(StringWithPath, "cd %s;", dir.toUtf8().data());
-    engEvalString(fmldata.ep, StringWithPath);
-    printf("Yes directory %s\n",StringWithPath);
+    engEvalString(fmldata.ep,s.toUtf8().data());
 }
-
 void MainAlgWorker::Pause()
 {
     engEvalString(fmldata.ep, "PAUSE();");
@@ -260,21 +255,27 @@ void MainAlgWorker::run(PacketSSL packetssl)
             double *itpause=mxGetPr(mxitpause);
             if (itpause!=0)
             {
-                if ((*itpause)==1)
-                    emit UpdatePauseState(1);
-                else
+                if ((*itpause)==0)
                 {
-                    if ((*itpause)==0)
-                        emit UpdatePauseState(0);
-                    else
-                        emit UpdatePauseState(-1);
+                    mxArray *mxzMain_End=engGetVariable(fmldata.ep,"zMain_End");
+                    if (mxzMain_End!=0)
+                    {
+                        double *zMain_End=mxGetPr(mxzMain_End);
+                        if (zMain_End!=0)
+                        {
+                            if ((*zMain_End)==0)
+                                emit UpdatePauseState("main br");
+                            else emit UpdatePauseState("WORK");
+                        }
+                        else emit UpdatePauseState("-err-z");
+                    }
+                    else emit UpdatePauseState("-err-mz");
                 }
+                else emit UpdatePauseState("PAUSE");
             }
-            else
-                emit UpdatePauseState(-2);
+            else emit UpdatePauseState("-err-p"); //Ответ от матлаба повреждён
         }
-        else
-            emit UpdatePauseState(-3);
+        else emit UpdatePauseState("-err-mp"); //Нет ответа от матлаб
     }
 
 // Сообщение ресиверу о готовности обработки нового пакета.

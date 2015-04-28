@@ -33,7 +33,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(&wifiform,SIGNAL(PickWifiRobot(QString)),this, SLOT(PickWifiRobot(QString)));
 
     //algorithm connect
-    connect(this, SIGNAL(MatlabChangeDirrectory(QString)),&mainalg.worker,SLOT(ChangeDirrectory(QString)));
+    connect(this, SIGNAL(MLEvalString(QString)),&mainalg.worker,SLOT(EvalString(QString)));
     connect(this, SIGNAL(MatlabPause()), &mainalg.worker, SLOT(Pause()));
     connect(&receiver.worker, SIGNAL(activateMA(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
     connect(&mainalg.worker, SIGNAL(mainAlgFree()), &receiver.worker, SLOT(MainAlgFree()));
@@ -47,13 +47,17 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(ui->sceneslider, SIGNAL(valueChanged(int)), this, SLOT(scaleView(int)));
 
     //info GUI
-    connect(&mainalg.worker,SIGNAL(UpdatePauseState(int)),this,SLOT(UpdatePauseState(int)));
+    connect(&mainalg.worker,SIGNAL(UpdatePauseState(QString)),this,SLOT(UpdatePauseState(QString)));
     connect(&mainalg.worker, SIGNAL(StatusMessage(QString)), this, SLOT(UpdateStatusBar(QString)));
     connect(&receiver.worker, SIGNAL(UpdateSSLFPS(QString)), this, SLOT(UpdateSSLFPS(QString)));
     connect(&bttransmitter.worker, SIGNAL(UpdatePipeStatus(bool)), this, SLOT(UpdatePipeStatus(bool)));
 
     //SendToBTtransmitter
     connect(&mainalg.worker,SIGNAL(sendToBTtransmitter(char*)),&bttransmitter.worker,SLOT(addmessage(char*)));
+
+    //remotecontrol
+    connect(&remotecontol,SIGNAL(RC_control(int,int,int,int)),this,SLOT(remcontrolsender(int, int,int, int)));
+    connect(this,SIGNAL(sendToConnectorRM(int,QByteArray)),&connector.worker,SLOT(run(int,QByteArray)));
 
     //fieldScene Update
     connect(&receiver.worker,SIGNAL(activateGUI()),this,SLOT(fieldsceneUpdateRobots()));
@@ -66,6 +70,16 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     bttransmitter.start();
     UpdateStatusBar("Waiting SSL connection...");
     UpdateSSLFPS("FPS=0");
+}
+
+void LARCmaCS::remcontrolsender(int l, int r,int k, int b)
+{
+    int N=ui->RobotComboBox->currentIndex()+1;
+    QByteArray command;
+    command.append(QString("rule ").toUtf8());
+    command.append(l);
+    command.append(r);
+    emit sendToConnectorRM(N,command);
 }
 void LARCmaCS::fieldsceneUpdateRobots()
 {
@@ -105,17 +119,9 @@ LARCmaCS::~LARCmaCS()
     delete ui;
 }
 
-void LARCmaCS::UpdatePauseState(int status)
-{
-    if (status==0)
-        ui->label_Pause->setText("Work");
-    else
-    {
-        if (status==1)
-            ui->label_Pause->setText("Pause");
-        else
-            ui->label_Pause->setText("-err-");
-    }
+void LARCmaCS::UpdatePauseState(QString message)
+{ 
+    ui->label_Pause->setText(message);
 }
 void LARCmaCS::UpdatePipeStatus(bool status)
 {
@@ -177,9 +183,10 @@ void LARCmaCS::on_pushButton_Pause_clicked()
 #include <QFileDialog>
 void LARCmaCS::on_pushButton_SetMLdir_clicked()
 {
-    QString  s = QFileDialog::getExistingDirectory();
+    QString  dir = QFileDialog::getExistingDirectory();
+    QString  s="cd "+dir;
     qDebug()<<"New Matlab directory = "<<s;
-    emit MatlabChangeDirrectory(s);
+    emit MLEvalString(s);
 }
 
 void LARCmaCS::on_PickRobot_pushButton_clicked()
@@ -198,4 +205,9 @@ void LARCmaCS::PickWifiRobot(QString addr)
     emit receiveMacArray(wifiaddrdata);
 }
 
-
+void LARCmaCS::on_pushButton_RC_clicked()
+{
+    remotecontol.hide();
+    remotecontol.show();
+    remotecontol.TimerStart();
+}

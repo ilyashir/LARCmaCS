@@ -73,7 +73,8 @@ SOURCES += main.cpp\
     connector.cpp \
     BTtransmitter.cpp \
     btform.cpp \
-    wifiform.cpp
+    wifiform.cpp \
+    remotecontrol.cpp
 
 HEADERS  += \
   $${SHARED_DIR}/net/netraw.h \
@@ -93,8 +94,10 @@ HEADERS  += \
     connector.h \
     BTtransmitter.h \
     btform.h \
-    wifiform.h
+    wifiform.h \
+    remotecontrol.h
 
 FORMS    += larcmacs.ui \
     btform.ui \
-    wifiform.ui
+    wifiform.ui \
+    remotecontrol.ui

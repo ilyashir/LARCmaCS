@@ -316,7 +316,7 @@
      </property>
     </item>
    </widget>
-   <widget class="QPushButton" name="pushButton_4">
+   <widget class="QPushButton" name="pushButton_RC">
     <property name="geometry">
      <rect>
       <x>170</x>

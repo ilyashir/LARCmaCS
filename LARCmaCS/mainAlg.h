@@ -30,7 +30,7 @@ signals:
     void sendToBTtransmitter(char * message);
     void mainAlgFree();
     void StatusMessage(QString message);
-    void UpdatePauseState(int state);
+    void UpdatePauseState(QString message);
 public slots:
     void start()
     {
@@ -40,11 +40,11 @@ public slots:
     }
 
     void stop() { shutdowncomp = true; }
-    void ChangeDirrectory(QString dir);
     void run(PacketSSL packetssl);
     void Pause();
     void run_matlab();
-    void stop_matlab();
+    void stop_matlab();    
+    void EvalString(QString s);
 
 private:
     void init();
