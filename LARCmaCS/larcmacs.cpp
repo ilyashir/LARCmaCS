@@ -63,6 +63,11 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(&receiver.worker,SIGNAL(activateGUI()),this,SLOT(fieldsceneUpdateRobots()));
     connect(&sceneview.worker,SIGNAL(updateRobots()),fieldscene,SLOT(update()));
     //    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
+
+    //BTsenderform
+    connect(&btform,SIGNAL(Send2BTChange(bool *)),this,SLOT(Send2BTChangeit(bool *)));
+    connect(&btform,SIGNAL(Send2BTChange(bool *)),&mainalg.worker,SLOT(Send2BTChangeit(bool *)));
+
     sceneview.start();
     receiver.start();
     mainalg.start();
@@ -70,8 +75,13 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     bttransmitter.start();
     UpdateStatusBar("Waiting SSL connection...");
     UpdateSSLFPS("FPS=0");
+    Send2BTChangeit(btform.Send2BT);
 }
 
+void LARCmaCS::Send2BTChangeit(bool * BTbox)
+{
+    ui->checkBox_BT->setChecked(btform.Send2BT[ui->RobotComboBox->currentIndex()]);
+}
 void LARCmaCS::remcontrolsender(int l, int r,int k, int b)
 {
     int N=ui->RobotComboBox->currentIndex()+1;
@@ -169,10 +179,11 @@ void LARCmaCS::updateView()
   }
 
 }
-
 void LARCmaCS::on_pushButton_clicked()
 {
+    btform.hide();
     btform.show();
+    btform.init();
 }
 
 void LARCmaCS::on_pushButton_Pause_clicked()
@@ -191,6 +202,7 @@ void LARCmaCS::on_pushButton_SetMLdir_clicked()
 
 void LARCmaCS::on_PickRobot_pushButton_clicked()
 {
+    wifiform.hide();
     wifiform.show();
 }
 
@@ -210,4 +222,15 @@ void LARCmaCS::on_pushButton_RC_clicked()
     remotecontol.hide();
     remotecontol.show();
     remotecontol.TimerStart();
+}
+
+void LARCmaCS::on_checkBox_BT_stateChanged(int arg1)
+{
+    btform.Send2BT[ui->RobotComboBox->currentIndex()]=arg1;
+    btform.init();
+}
+
+void LARCmaCS::on_RobotComboBox_currentIndexChanged(int index)
+{
+     ui->checkBox_BT->setChecked(btform.Send2BT[ui->RobotComboBox->currentIndex()]);
 }

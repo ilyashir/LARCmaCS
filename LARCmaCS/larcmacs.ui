@@ -63,7 +63,7 @@
   </widget>
   <widget class="QPushButton" name="pushButton">
    <property name="enabled">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <property name="geometry">
     <rect>
@@ -220,7 +220,7 @@
    <property name="flat">
     <bool>true</bool>
    </property>
-   <widget class="QCheckBox" name="checkBox">
+   <widget class="QCheckBox" name="checkBox_BT">
     <property name="geometry">
      <rect>
       <x>150</x>

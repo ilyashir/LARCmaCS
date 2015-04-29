@@ -5,6 +5,7 @@
 #include <windows.h>
 //#include <process.h>
 
+#include <QtWidgets/QApplication>
 using namespace std;
 
 int initConfig(RCConfig *config){
@@ -161,8 +162,18 @@ void MainAlgWorker::Pause()
 {
     engEvalString(fmldata.ep, "PAUSE();");
 }
+#include "QDebug"
+void MainAlgWorker::Send2BTChangeit(bool * send2BT_)
+{
+    for (int i=0; i<MAX_NUM_ROBOTS; i++)
+    {
+        Send2BT[i]=send2BT_[i];
+    }
+}
 void MainAlgWorker::run(PacketSSL packetssl)
 {
+    if (shutdowncomp)
+        return;
     timer = clock();
     Time_count++;
 
@@ -203,7 +214,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
         {
             char * newmessage=new char[100];
             memcpy(newmessage,newmess,100);
-            emit sendToBTtransmitter(newmessage);
+            if ((newmess[1]>0) && (newmess[1]<=MAX_NUM_ROBOTS) && (Send2BT[newmess[1]-1]==true))
+                emit sendToBTtransmitter(newmessage);
 
             QByteArray command;
             command.append(QString("rule ").toUtf8());
@@ -279,6 +291,8 @@ void MainAlgWorker::run(PacketSSL packetssl)
     }
 
 // Сообщение ресиверу о готовности обработки нового пакета.
+
+    QApplication::processEvents();
     emit mainAlgFree();
 //    qDebug()<<"MainAlg!";
 

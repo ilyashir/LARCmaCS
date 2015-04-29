@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>66</width>
-    <height>236</height>
+    <width>55</width>
+    <height>275</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,6 +25,9 @@
    <property name="text">
     <string>10</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt2">
    <property name="geometry">
@@ -37,6 +40,9 @@
    </property>
    <property name="text">
     <string>2</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt9">
@@ -51,6 +57,9 @@
    <property name="text">
     <string>9</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt5">
    <property name="geometry">
@@ -63,6 +72,9 @@
    </property>
    <property name="text">
     <string>5</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt4">
@@ -77,6 +89,9 @@
    <property name="text">
     <string>4</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt8">
    <property name="geometry">
@@ -89,6 +104,9 @@
    </property>
    <property name="text">
     <string>8</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt6">
@@ -103,6 +121,9 @@
    <property name="text">
     <string>6</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt_all">
    <property name="geometry">
@@ -115,6 +136,9 @@
    </property>
    <property name="text">
     <string>ALL</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt1">
@@ -129,6 +153,9 @@
    <property name="text">
     <string>1</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt7">
    <property name="geometry">
@@ -142,6 +169,9 @@
    <property name="text">
     <string>7</string>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
   </widget>
   <widget class="QCheckBox" name="checkBox_bt3">
    <property name="geometry">
@@ -154,6 +184,41 @@
    </property>
    <property name="text">
     <string>3</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_bt11">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>230</y>
+     <width>70</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>11</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_bt12">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>250</y>
+     <width>70</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>12</string>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
    </property>
   </widget>
  </widget>

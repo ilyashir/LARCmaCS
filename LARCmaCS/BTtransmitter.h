@@ -11,7 +11,7 @@
 #include <qlocalsocket.h>
 #include <qlocalserver.h>
 #define BT_MESSAGE_SIZE 100
-
+#define MAX_QUE_SIZE 120
 #include <QDebug>
 
 #include <QQueue>
@@ -65,6 +65,10 @@ signals:
 protected slots:
     void addmessage(char * message)
     {
+        if (que.size()>=MAX_QUE_SIZE)
+        {
+            que.dequeue().s;
+        }
         if (DispLog)
             qDebug()<<"<BTtransmitter>: New message to send";
         que.enqueue(mess(message));

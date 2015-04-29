@@ -31,15 +31,14 @@ void BTtransmitterWorker::run()
                 if (write(que.dequeue().s)==0)
                 {
                     client->abort();
-                }
+                }                
             }
             else
             {
                 Sleep(1);
-                QApplication::processEvents();
-            }
+            }            
+            QApplication::processEvents();
         }
-        QApplication::processEvents();
     }
 }
 bool BTtransmitterWorker::write(char * message)

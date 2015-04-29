@@ -18,11 +18,16 @@ struct MainAlgWorker : public QObject
     Q_OBJECT
     clock_t timer,timer_s,timer_m,timer_max;
     int Time_count;
+    bool Send2BT[MAX_NUM_ROBOTS];
 public:
     explicit MainAlgWorker(){
         timer_s=0;
         timer_m=clock();
         Time_count=0;
+        for (int i=0; i<MAX_NUM_ROBOTS; i++)
+        {
+            Send2BT[i]=true;
+        }
     }
     ~MainAlgWorker() {}
 signals:
@@ -38,6 +43,7 @@ public slots:
         cout << "MainAlg worker start" << endl;
         init();
     }
+    void Send2BTChangeit(bool *send2BT_);
 
     void stop() { shutdowncomp = true; }
     void run(PacketSSL packetssl);

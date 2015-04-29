@@ -49,6 +49,7 @@ private:
     QString wifiaddrdata[NUM_CONTROL_ROBOTS];
 
 private slots:
+    void Send2BTChangeit(bool *BTbox);
     void fieldsceneUpdateRobots();
     void UpdateSSLFPS(QString message);
     void UpdateStatusBar(QString message);
@@ -56,7 +57,6 @@ private slots:
     void UpdatePauseState(QString message);
     void updateView();
     void scaleView(int);
-    void on_pushButton_clicked();
 
 private slots:
     void PickWifiRobot(QString addr);
@@ -65,6 +65,10 @@ private slots:
     void on_pushButton_SetMLdir_clicked();
     void on_pushButton_RC_clicked();
     void remcontrolsender(int l, int r,int k, int b);
+    void on_checkBox_BT_stateChanged(int arg1);
+    void on_pushButton_clicked();
+
+    void on_RobotComboBox_currentIndexChanged(int index);
 
 signals:
     void sendToConnectorRM(int N,QByteArray command);
