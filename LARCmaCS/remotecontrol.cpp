@@ -1,7 +1,7 @@
 #include "remotecontrol.h"
 #include "ui_remotecontrol.h"
 
-#define RC_TIMER_CD 10
+#define RC_TIMER_CD 100
 
 #include <QDebug>
 RemoteControl::RemoteControl(QWidget *parent) :

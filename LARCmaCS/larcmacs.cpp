@@ -61,7 +61,7 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
 
     //fieldScene Update
     connect(&receiver.worker,SIGNAL(activateGUI()),this,SLOT(fieldsceneUpdateRobots()));
-    connect(&sceneview.worker,SIGNAL(updateRobots()),fieldscene,SLOT(update()));
+    connect(this,SIGNAL(updateRobots()),fieldscene,SLOT(update()));
     //    connect(&receiver.worker, SIGNAL(activateGUI(PacketSSL)), &sceneview.worker, SLOT(repaintScene(PacketSSL)));
 
     //BTsenderform
@@ -89,11 +89,14 @@ void LARCmaCS::remcontrolsender(int l, int r,int k, int b)
     command.append(QString("rule ").toUtf8());
     command.append(l);
     command.append(r);
+    command.append(k);
+    command.append(b);
     emit sendToConnectorRM(N,command);
 }
 void LARCmaCS::fieldsceneUpdateRobots()
 {
     fieldscene->UpdateRobots(receiver.worker.detection);
+    emit updateRobots();
 }
 /*
 void LARCmaCS::initEnded()

@@ -214,7 +214,7 @@ void MainAlgWorker::run(PacketSSL packetssl)
         {
             char * newmessage=new char[100];
             memcpy(newmessage,newmess,100);
-            if ((newmess[1]>0) && (newmess[1]<=MAX_NUM_ROBOTS) && (Send2BT[newmess[1]-1]==true))
+            if ((newmess[1]>=0) && (newmess[1]<=MAX_NUM_ROBOTS) && ((newmess[1]==0) || (Send2BT[newmess[1]-1]==true)))
                 emit sendToBTtransmitter(newmessage);
 
             QByteArray command;

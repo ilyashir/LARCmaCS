@@ -10,7 +10,7 @@ void sceneViewWorker::run(){
     while(!shutdownview){
 //        cout << "signal updateView" << endl;
         emit updateView();
-        emit updateRobots();
+        //emit updateRobots();
         QApplication::processEvents();
         Sleep(1);
     }

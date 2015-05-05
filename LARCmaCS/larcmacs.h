@@ -75,6 +75,7 @@ signals:
     void receiveMacArray(QString*);
     void MatlabPause();
     void MLEvalString(QString s);
+    void updateRobots();
 };
 
 #endif // LARCMACS_H
