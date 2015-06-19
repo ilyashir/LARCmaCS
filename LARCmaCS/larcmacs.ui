@@ -343,6 +343,42 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="ArduinoGroup">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>480</y>
+     <width>81</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Arduino</string>
+   </property>
+   <widget class="QComboBox" name="ard_comboBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>20</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="openPortButton">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>61</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Open</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

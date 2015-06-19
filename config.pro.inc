@@ -20,7 +20,7 @@ else {
 SHARED_DIR = ../macsCommon
 LIB_DIR = ../lib
 DESTDIR = ../bin$${SUFFIX_STR}
-MATLAB_DIR = c:/MATLAB/R2009b/extern\
+MATLAB_DIR = d:/Work)/MATLAB/R2012b_x86/extern/
 
 unix {
   DEFINES+=UNIX

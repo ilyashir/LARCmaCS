@@ -12,6 +12,8 @@
 #include "BTform.h"
 #include "WiFiForm.h"
 #include "remotecontrol.h"
+
+
 #define NUM_CONTROL_ROBOTS 12
 
 namespace Ui
@@ -69,6 +71,9 @@ private slots:
     void on_pushButton_clicked();
 
     void on_RobotComboBox_currentIndexChanged(int index);
+    void displayPorts(QStringList);
+
+    void on_openPortButton_clicked();
 
 signals:
     void sendToConnectorRM(int N,QByteArray command);
@@ -76,6 +81,7 @@ signals:
     void MatlabPause();
     void MLEvalString(QString s);
     void updateRobots();
+    void openPort(QString);
 };
 
 #endif // LARCMACS_H

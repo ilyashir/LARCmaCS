@@ -31,6 +31,8 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
 
     // GUIS
     connect(&wifiform,SIGNAL(PickWifiRobot(QString)),this, SLOT(PickWifiRobot(QString)));
+    connect(&connector.worker,SIGNAL(sendPortList(QStringList)),this,SLOT(displayPorts(QStringList)));
+    connect(this,SIGNAL(openPort(QString)),&connector.worker,SLOT(openPort(QString)));
 
     //algorithm connect
     connect(this, SIGNAL(MLEvalString(QString)),&mainalg.worker,SLOT(EvalString(QString)));
@@ -76,6 +78,13 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     UpdateStatusBar("Waiting SSL connection...");
     UpdateSSLFPS("FPS=0");
     Send2BTChangeit(btform.Send2BT);
+
+}
+
+void LARCmaCS::displayPorts(QStringList portList)
+{
+    //for (int i=0;i<portList.size();++i)
+    ui->ard_comboBox->addItems(portList);
 }
 
 void LARCmaCS::Send2BTChangeit(bool * BTbox)
@@ -84,6 +93,7 @@ void LARCmaCS::Send2BTChangeit(bool * BTbox)
 }
 void LARCmaCS::remcontrolsender(int l, int r,int k, int b)
 {
+    //qDebug()<<"REM!";
     int N=ui->RobotComboBox->currentIndex()+1;
     QByteArray command;
     command.append(QString("rule ").toUtf8());
@@ -91,6 +101,15 @@ void LARCmaCS::remcontrolsender(int l, int r,int k, int b)
     command.append(r);
     command.append(k);
     command.append(b);
+//    char dat[5];
+//    //dat[0] = 'c';
+//    dat[0] = '<';
+//    dat[1] = r;
+//    dat[2] = l;
+//    dat[3] = k;
+//    dat[4] = '>';
+//    if (port->isOpen())
+//        port->write(dat,5);
     emit sendToConnectorRM(N,command);
 }
 void LARCmaCS::fieldsceneUpdateRobots()
@@ -236,4 +255,9 @@ void LARCmaCS::on_checkBox_BT_stateChanged(int arg1)
 void LARCmaCS::on_RobotComboBox_currentIndexChanged(int index)
 {
      ui->checkBox_BT->setChecked(btform.Send2BT[ui->RobotComboBox->currentIndex()]);
+}
+
+void LARCmaCS::on_openPortButton_clicked()
+{
+    emit openPort(ui->ard_comboBox->currentText());
 }

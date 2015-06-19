@@ -13,9 +13,20 @@
 #include <QTimer>
 #include <QMap>
 
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+
 using std::map;
 using std::vector;
 #include <Set>
+
+//struct ArduinoConnector : QObject
+//{
+//    Q_OBJECT
+//public:
+//    ArduinoConnector(){}
+
+//};
 
 struct ConnectorWorker : QObject
 {
@@ -48,6 +59,9 @@ public:
     int connectedRobots;
     QByteArray command;
 
+    QSerialPort * port;
+    char dat[12];
+
 
 signals:
     void receivedDatagram(QByteArray datagram);
@@ -57,6 +71,7 @@ signals:
     void allTasksDone();
     void robotAdded(QString);
     void sendMacs(QList<QString>);
+    void sendPortList(QStringList);
 
 public slots:
     void init();
@@ -72,6 +87,8 @@ public slots:
     void startBroadcast();
 
     void receiveMacArray(QString*);
+    void openPort(QString);
+    void readPort();
 };
 
 struct Connector : QObject
