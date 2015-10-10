@@ -88,7 +88,8 @@ void ReceiverWorker::run()
             else
             {
                 NewPacket=true;
-                emit activateGUI();
+                if (MaxPacketFrequencyMod)
+                    emit activateGUI();
             }
         }
         else           
