@@ -75,9 +75,12 @@ private slots:
 
     void on_openPortButton_clicked();
 
+    void on_checkBox_MlMaxFreq_stateChanged(int arg1);
+
 signals:
     void sendToConnectorRM(int N,QByteArray command);
     void receiveMacArray(QString*);
+    void ChangeMaxPacketFrequencyMod(bool state);
     void MatlabPause();
     void MLEvalString(QString s);
     void updateRobots();

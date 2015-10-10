@@ -39,6 +39,8 @@ LARCmaCS::LARCmaCS(QWidget *parent) :
     connect(this, SIGNAL(MatlabPause()), &mainalg.worker, SLOT(Pause()));
     connect(&receiver.worker, SIGNAL(activateMA(PacketSSL)), &mainalg.worker, SLOT(run(PacketSSL)));
     connect(&mainalg.worker, SIGNAL(mainAlgFree()), &receiver.worker, SLOT(MainAlgFree()));
+    //reciever
+    connect(this,SIGNAL(ChangeMaxPacketFrequencyMod(bool)),&receiver.worker,SLOT(ChangeMaxPacketFrequencyMod(bool)));
 
     //send command to robots
     connect(this,SIGNAL(receiveMacArray(QString*)),&connector.worker,SLOT(receiveMacArray(QString*)));
@@ -260,4 +262,9 @@ void LARCmaCS::on_RobotComboBox_currentIndexChanged(int index)
 void LARCmaCS::on_openPortButton_clicked()
 {
     emit openPort(ui->ard_comboBox->currentText());
+}
+
+void LARCmaCS::on_checkBox_MlMaxFreq_stateChanged(int arg1)
+{
+    emit(ChangeMaxPacketFrequencyMod(arg1>0));
 }

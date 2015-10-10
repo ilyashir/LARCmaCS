@@ -20,19 +20,36 @@ struct ReceiverWorker : public QObject
 public:
     explicit ReceiverWorker() {mainalgisfree=true;timer_m=clock(); Time_count=0;}
 public slots:
-    void MainAlgFree(){mainalgisfree=true;}
+    void MainAlgFree()
+    {
+       if ((NewPacket) && (MaxPacketFrequencyMod))
+       {
+           mainalgisfree=false;
+           NewPacket=false;
+           emit activateMA(packetssl);
+           //emit activateGUI();
+       }
+       else
+           mainalgisfree=true;
+    }
     void start()
     {
         shutdownread = false;
         mainalgisfree = true;
+        NewPacket=false;
+        MaxPacketFrequencyMod=false;
         cout << "Receiver worker start" << endl;
         run();
     }    
 
     void stop() { shutdownread = true; }
 
-    void mainAlgFree() {mainalgisfree = true; }
-
+public slots:
+    void ChangeMaxPacketFrequencyMod(bool state)
+    {
+        MaxPacketFrequencyMod=state;
+        cout<<"MaxPacketFrequencyMod = "<<state<<endl;
+    }
 public:
     SSL_DetectionFrame detection;
 signals:
@@ -41,14 +58,17 @@ signals:
     void UpdateSSLFPS(QString message);
 
 private:
+    PacketSSL packetssl;
     clock_t timer_m;
     int Time_count;
 private:
     void run();
     RoboCupSSLClient client;
     SSL_WrapperPacket packet;
+    bool NewPacket;
     bool shutdownread;
     bool mainalgisfree;
+    bool MaxPacketFrequencyMod;
 };
 
 struct Receiver : public QObject

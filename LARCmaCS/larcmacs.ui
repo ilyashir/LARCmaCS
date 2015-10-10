@@ -379,6 +379,19 @@
     </property>
    </widget>
   </widget>
+  <widget class="QCheckBox" name="checkBox_MlMaxFreq">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>570</y>
+     <width>161</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>MaxMLPacketFrequencyMod</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

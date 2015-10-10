@@ -202,7 +202,7 @@ void FieldScene::UpdateRobots ( SSL_DetectionFrame &detection )
     QString label;
 
     if ( id!=NA )
-      label.setNum ( id,16 );
+      label.setNum ( id+1,16 );
     else
       label = "?";
     label = label.toUpper();

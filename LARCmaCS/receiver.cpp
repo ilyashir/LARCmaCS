@@ -30,7 +30,7 @@ void ReceiverWorker::run()
             packetsNum++;
             //cout << "Num RECEIVER:" << packetsNum << endl;
 
-            PacketSSL packetssl;
+
             qRegisterMetaType<PacketSSL>("PacketSSL"); // for queueing arguments between threads
 
             detection = packet.detection();
@@ -81,7 +81,13 @@ void ReceiverWorker::run()
             if (mainalgisfree)
             {
                 mainalgisfree=false;
+                NewPacket=false;
                 emit activateMA(packetssl);
+                emit activateGUI();
+            }
+            else
+            {
+                NewPacket=true;
                 emit activateGUI();
             }
         }
