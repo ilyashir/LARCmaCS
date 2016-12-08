@@ -59,6 +59,7 @@ void ReceiverWorker::run()
 
             for (int i = 0; i < robots_blue_n; i++) {
                 robot = detection.robots_blue(i);
+                cout << "-Robot(B) (" << i+1 << "/" << robots_blue_n << ")" << endl;
                 packetssl.robots_blue[robot.robot_id()] = idCam;
                 packetssl.robots_blue[robot.robot_id() + 12] = robot.x();
                 packetssl.robots_blue[robot.robot_id() + 24] = robot.y();

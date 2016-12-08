@@ -1,9 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-12-02T01:05:35
-#
-#-------------------------------------------------
-
 CONFIG += qt thread
 CONFIG += console
 CONFIG += c++11
@@ -11,19 +5,20 @@ CONFIG -= warn_off
 CONFIG += debug_and_release build_al
 
 SHARED_DIR = ../src/shared
+#where to place protobuf files [pb.cc] [pb.h]
 LIST_DIR = ../build
 
 #where to place built objects
-OBJECTS_DIR = ../build/LARCmaCS/obj$${SUFFIX_STR}
+OBJECTS_DIR = build/LARCmaCS/obj$${SUFFIX_STR}
 
 #where to place temporary moc sources
-MOC_DIR = ../build/LARCmaCS/moc
+MOC_DIR = build/LARCmaCS/moc
 
 #where to place auto-generated UI files
-UI_DIR = ../build/LARCmaCS/ui
+UI_DIR = build/LARCmaCS/ui
 
 #where to place intermediate resource files
-RCC_DIR = ../build/LARCmaCS/resources
+RCC_DIR = build/LARCmaCS/resources
 
 unix {
   DEFINES += UNIX
@@ -132,12 +127,6 @@ HEADERS  += larcmacs.h \
     ../src/shared/gl/glcamera.h \
     ../src/shared/gl/globject.h \
     ../src/shared/net/robocup_ssl_server.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_detection.pb.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_geometry.pb.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_geometry_legacy.pb.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_refbox_log.pb.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_wrapper.pb.h \
-    ../src/shared/proto/cpp/messages_robocup_ssl_wrapper_legacy.pb.h \
     ../src/shared/util/affinity_manager.h \
     ../src/shared/util/bbox.h \
     ../src/shared/util/bitflags.h \
